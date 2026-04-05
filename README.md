@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="content_remix_terminal-outlined.svg" alt="Content Remix Skill" width="680">
+
 ### CONTENT REMIX SKILL
 **A Claude Code skill for content strategists and digital marketers.**
 
