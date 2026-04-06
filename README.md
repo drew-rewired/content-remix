@@ -9,7 +9,7 @@
 
 <br>
 
-<img src="https://img.shields.io/badge/version-1.0-000000?style=flat-square" alt="version">&nbsp;<img src="https://img.shields.io/badge/free-open%20source-111111?style=flat-square" alt="free">&nbsp;<img src="https://img.shields.io/badge/Claude%20Code-skill-CC0000?style=flat-square" alt="Claude Code skill">
+<img src="https://img.shields.io/badge/version-2.0-000000?style=flat-square" alt="version">&nbsp;<img src="https://img.shields.io/badge/free-open%20source-111111?style=flat-square" alt="free">&nbsp;<img src="https://img.shields.io/badge/Claude%20Code-skill-CC0000?style=flat-square" alt="Claude Code skill">
 
 <br>
 
@@ -58,6 +58,8 @@ They work independently — but together they close the full loop: see clearly, 
 ---
 
 ## Version highlights
+
+**v2.0** — Major update. Funnel stage detection from source asset; Gate 1.5 for output stage lock; 12 output formats (white paper and ebook now separate; Optimize Original added); Content Brief mode for net-new content without a source asset; Content Map gap integration for brief pre-population; internal linking waterfall (Content Map → sitemap crawl → user page list → homepage nav); GEO (Generative Engine Optimization) added as third quality framework alongside EEAT and AEO; YMYL elevated quality flag for healthcare, finance, and legal content; Quality Gate (internal self-review before delivery); AskUserQuestion interactive prompts throughout gates; per-section chunk targets (200–400 words) in all output skeletons.
 
 **v1.0** — Initial release. Pre-run workflow with seven gates; ten channel-native output formats; memory/learning system; research mode with citation blocks; brand voice extraction from docs/URLs; tabbed HTML output for multi-format jobs; job folder naming and output saving.
 
@@ -117,12 +119,13 @@ Every job runs through seven gates before any content is generated:
 
 | Gate | What it confirms |
 |---|---|
-| 1. Input | URL, PDF upload, or pasted text |
-| 2. Output format | Which format(s) to produce |
-| 3. Subtypes | Format-specific questions (landing page type, podcast format, platform, etc.) |
-| 4. Channel intent | Where this content will live and what it needs to do |
-| 5. Audience confirmation | Loaded from config or overridden for this job |
-| 6. Research mode | Explicit yes / no before going online for any sources |
+| 1. Input | URL, PDF, pasted text, or Content Brief for net-new content. Detects funnel stage from source asset signals. |
+| 1.5. Output stage | Lock funnel stage for the output — same as source, repositioned, or confirmed per format |
+| 2. Output format | Which of 12 formats to produce |
+| 3. Subtypes | Format-specific questions (landing page type, podcast format, email goal, platform, etc.) |
+| 4. Channel intent | Where this content will live — paid vs. organic impacts structure and CTA density |
+| 5. Audience confirmation | Loaded from config or overridden for this job (save as default or job-only) |
+| 6. Research mode | Explicit choice before going online — research strongly recommended for Content Brief runs |
 | 7. Job name | Confirms the output folder name before anything is written |
 
 A pre-run summary block is shown before generation begins. Nothing is produced until you confirm.
@@ -139,20 +142,24 @@ You are presented with your saved config and memory state, then dropped straight
 
 ---
 
-## The ten output formats
+## The twelve output formats
 
 | Format | What it produces |
 |---|---|
-| Blog post | Full-length SEO-structured post with declarative H2/H3s, short paragraphs, internal link placeholders, and meta description |
+| Blog post | Full-length SEO-structured post with declarative H2/H3s, TL;DR block, short paragraphs, internal links, and meta description |
+| Email — single | One email with goal and funnel stage confirmed before writing: subject, preview text, body, CTA |
 | Email sequence | 3–5 email series with subject lines, preview text, and body copy — each email has one job |
 | LinkedIn posts | Platform-native posts with hook, body, and CTA; no hashtag spam; written for scroll-stop |
 | Social posts | Platform-specific copy for any channel; asks for platform and post count before writing |
+| White paper | Research-heavy, authoritative, citation-dense, 3,000–5,000 words. Executive summary, problem statement, analysis, recommendations. |
+| Ebook | Educational, step-by-step, 2,000–4,000 words. Chapter-based structure with callouts, checklists, and visual breaks. |
 | Landing page | Full page copy with hero, body sections, proof points, and CTA — asks for subtype before writing |
-| Podcast script | Solo or interview format; calibrated to target duration at 125–150 WPM; verbal enumeration, no visual references |
+| Podcast script | Solo or interview format; calibrated to target duration; verbal enumeration, no visual references |
 | Presentation outline | Slide-by-slide structure with talking points — asks for context and target length |
 | Video / explainer script | 5-sec hook, problem statement, solution narrative, proof points, CTA; written for spoken delivery |
 | Infographic brief | Content document for a designer: title, section breakdown, data points, suggested visual treatments, CTA copy |
 | Ad copy variants | Platform-native ad copy with headline, body, and CTA variants — asks for platform and match type |
+| Optimize Original | Improved version of the same format — better structure, EEAT/AEO/GEO signals, internal links added, copy tightened |
 
 ---
 

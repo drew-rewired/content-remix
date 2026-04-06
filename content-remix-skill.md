@@ -12,7 +12,7 @@ Licensed under CC BY-NC 4.0 — free to use and modify; commercial use and resal
 
 **Slash command**: `/content-remix`
 **Reconfigure at any time**: `/content-remix-setup`
-**Version**: 1.0
+**Version**: 2.0
 
 ---
 
@@ -53,7 +53,7 @@ When paired with the Content Map Skill, your output is grounded in keyword strat
 **On every invocation, before anything else:**
 
 1. Fetch `https://raw.githubusercontent.com/drew-rewired/content-map/main/bonus/version.txt` using WebFetch.
-2. Compare the returned version string against the version in this file's header (`1.0`).
+2. Compare the returned version string against the version in this file's header (`2.0`).
 3. If the fetched version is newer, display this notice once and then continue normally:
 
 > "**Update available:** A newer version of the Content Remix Skill (v[X.X]) is available. To update, run this in your terminal:
@@ -75,7 +75,7 @@ content-remix/
 ├── content-remix-config.json   ← saved configuration
 ├── content-remix-memory.json   ← learning and preference memory (never shown unless asked)
 └── jobs/
-    └── {job-slug}-{YYYY-MM-DD}/
+    └── {job-name}-{YYYY-MM-DD}/
         ├── input/                  ← source asset(s)
         └── output/                 ← all generated files for this run
 ```
@@ -90,7 +90,7 @@ This skill maintains a memory file at `content-remix/content-remix-memory.json`.
 
 The memory file tracks four things:
 
-**Approved outputs.** Every output the user accepts without requesting changes is logged by format, job slug, and date. Over time, approved outputs become style references — the skill reads them silently when generating new content for this user, calibrating voice and structure to match what has already been approved.
+**Approved outputs.** Every output the user accepts without requesting changes is logged by format, job name, and date. Over time, approved outputs become style references — the skill reads them silently when generating new content for this user, calibrating voice and structure to match what has already been approved.
 
 **Edit patterns.** When a user asks to change something in an output — tone, length, structure, a specific phrase — the pattern is logged. If the same type of edit is requested three or more times, it is applied automatically on future runs without being asked. The user is notified once in the pre-run summary: "Based on your past edits, I'll automatically [apply the pattern]. Let me know if you'd like to change that."
 
@@ -115,28 +115,19 @@ Look for `content-remix/content-remix-config.json` in the current working direct
 
 ## Map Context Loading
 
-Before every run — whether first launch or return — check for a content map report:
+Check for a content map report on every run.
 
 Search for `content-map/*/content-map-report.md` in the current working directory.
 
 - **If found**: Load it silently as background context. Do not announce it. Use it to inform keyword strategy, funnel stage positioning, internal linking opportunities, EEAT gap findings, competitor intelligence, and brand voice. This context shapes every decision the skill makes.
-- **If not found**: Display the following notice **once per session only**. Do not repeat it. Do not block the user from proceeding.
+- **If not found on a return run (config exists)**: Display the following notice **once per session only**. Do not repeat it. Do not block the user from proceeding.
+- **If not found on first launch (no config)**: Suppress this notice entirely. Do not display it during onboarding. Display it only at the start of the first job run, after setup is complete.
 
 > "No Content Map found for this domain. This skill works best when paired with the Content Map Skill — without it, remix decisions won't be informed by your keyword strategy, funnel stage assignments, EEAT findings, or internal linking opportunities. You can still proceed. Results will be based on the input asset alone. Run the Content Map Skill first for best results, or continue without it."
 
 ---
 
 ## Onboarding Flow
-
-Before the six setup steps, ask one detection question:
-
-> "Before we get started — have you already documented your brand voice, audience, and ICP somewhere? A brand guide, a brief, a document, anything?"
-
-**If yes:** "Great. How would you like to share it? You can upload the file, paste the text directly, or give me a URL to read." Accept whichever format they provide. Extract brand voice, primary audience, and ICP from the source. Save to `content-remix-config.json`. Skip the relevant onboarding steps for fields that were successfully extracted. Confirm what was captured before moving on.
-
-**If no:** Walk through the six steps below.
-
----
 
 Greet the user when onboarding begins:
 
@@ -145,6 +136,14 @@ Greet the user when onboarding begins:
 > Let me ask a few questions to set up your configuration. The only thing I need to run at all is your domain. Everything else is optional — but the more context you give me, the more accurate and on-brand your output will be.
 >
 > Your answers will be saved to `content-remix/content-remix-config.json`. You can update any part of your configuration at any time by typing `/content-remix-setup`."
+
+Then use the AskUserQuestion tool for the detection question:
+- Question: "Before we dive into setup — have you already documented your brand voice, audience, and Ideal Customer Profile (ICP) somewhere? A brand guide, a brief, a document, anything?"
+- Options: "Yes — I have something to share" | "No — let's set it up now"
+
+**If yes:** "Great. How would you like to share it? You can upload the file, paste the text directly, or give me a URL to read." Accept whichever format they provide. Extract brand voice, primary audience, and ICP from the source. Save to `content-remix-config.json`. Skip the relevant onboarding steps for fields that were successfully extracted. Confirm what was captured before moving on.
+
+**If no:** Walk through the six steps below.
 
 ---
 
@@ -160,6 +159,8 @@ Required. If the user skips or does not provide one, ask once more. If still not
 
 Ask: "Who is this content for? Job title, industry, level of sophistication. Example: `VP of Marketing at a mid-size B2B healthcare company`"
 
+*To skip, press Enter or type 'skip'.*
+
 If skipped:
 
 > **Setup gap: Primary audience not provided.**
@@ -171,6 +172,8 @@ If skipped:
 ### Step 3 — Brand Voice
 
 Ask: "How should your content sound? Give me three to five descriptors. Also: what should it never sound like? Example: `Direct, authoritative, practitioner-grade — never corporate, never fluffy`"
+
+*To skip, press Enter or type 'skip'.*
 
 If skipped:
 
@@ -184,6 +187,8 @@ If skipped:
 
 Ask: "What is this content program trying to accomplish? Lead generation, thought leadership, organic traffic, AEO visibility, sales enablement — or something else?"
 
+*To skip, press Enter or type 'skip'.*
+
 If skipped:
 
 > **Setup gap: Content goals not provided.**
@@ -196,6 +201,8 @@ If skipped:
 
 Ask: "Are there any topics, angles, competitors, or framings this brand should never reference? Legal restrictions, sensitive subjects, anything off the table."
 
+*To skip, press Enter or type 'skip'.*
+
 If skipped, move forward with no callout. Purely protective — nothing to enforce if nothing is flagged.
 
 ---
@@ -204,6 +211,8 @@ If skipped, move forward with no callout. Purely protective — nothing to enfor
 
 Ask: "Anything else that would help me understand your brand, solutions, verticals, audience segments, or upcoming priorities? Free text — no format required. This field grows over time, so add anything that comes to mind now and add more later."
 
+*To skip, press Enter or type 'skip'.*
+
 - If provided: save to config under `additional_context`. This field is appendable — new entries are added to what exists, never overwriting it, unless the user explicitly chooses to replace the whole field.
 - If skipped: move forward with no flag, no friction.
 
@@ -211,11 +220,22 @@ Ask: "Anything else that would help me understand your brand, solutions, vertica
 
 ### Config Save
 
-When all steps are complete, save to `content-remix/content-remix-config.json` (creating the folder if it does not exist). Initialize `content-remix-memory.json` as an empty structure. Then tell the user:
+When all steps are complete, save to `content-remix/content-remix-config.json` (creating the folder if it does not exist). Initialize `content-remix-memory.json` as an empty structure. Then display a summary of everything saved:
 
-> "Setup complete. Your configuration is saved.
+> "Setup complete. Here's what I saved:
 >
-> To begin, give me an asset to work with — a URL, a PDF, a document, an image, or any content you want to remix. Tell me what you need it to become and I'll take it from there.
+> | Field | Value |
+> |---|---|
+> | Domain | [saved value or 'not provided'] |
+> | Primary audience | [saved value or 'not provided'] |
+> | Brand voice | [saved value or 'not provided'] |
+> | Content goals | [saved value or 'not provided'] |
+> | Off-limits topics | [saved value or 'none'] |
+> | Additional context | [saved value or 'none'] |
+>
+> Does everything look right? If you need to change anything, type `/content-remix-setup` now or at any time.
+>
+> When you're ready, give me an asset to work with — a URL, a PDF, a document, an image, or any content you want to remix. Tell me what you need it to become and I'll take it from there.
 >
 > **You can update any part of your setup at any time by typing `/content-remix-setup`.**"
 
@@ -242,69 +262,170 @@ When done:
 
 ## Return Launch
 
-When config already exists, load config and memory silently, then present:
+When config already exists, load config and memory silently, then use the AskUserQuestion tool:
+- Question: "Welcome back. What would you like to do?"
+- Options: "New remix job" | "Continue a previous job" | "Reconfigure my settings"
 
-> "Welcome back. What would you like to do?
->
-> **1. New remix job** — Give me an asset (URL, PDF, document, image, transcript) and tell me what format(s) you need. I'll handle the rest.
->
-> **2. Continue a job** — Return to a previous job. I'll show you what's been saved in `content-remix/jobs/`.
->
-> **3. Reconfigure** — Update your brand context, voice, audience, or goals."
+**If "New remix job":** Proceed directly to Gate 1.
+**If "Continue a previous job":** Show what's been saved in `content-remix/jobs/`. Let the user select the job to resume.
+**If "Reconfigure my settings":** Run `/content-remix-setup`.
 
 ---
 
 ## Pre-Run Workflow
 
-This workflow runs before any content is generated. Every gate is a selection prompt — not a free-text guess. Present the options clearly. Wait for the user's answer before moving to the next gate. Do not generate a single word of content until Gate 7 is confirmed.
+This workflow runs before any content is generated. Every gate is a selection prompt — not a free-text guess. **Use the AskUserQuestion tool for any gate with 2–4 options** so the user gets a clickable popup UI rather than a text field. For gates with 5 or more options, present a numbered list and wait for the user's selection number. Do not generate a single word of content until Gate 7 is confirmed.
 
 ---
 
 ### Gate 1 — Input
 
-Ask: "What are you working with?"
+Present as a numbered list and wait for the user's selection:
 
+> "What are you working with?
+>
 > **1. URL** — Paste a link and I'll fetch the page.
 > **2. PDF** — Upload or provide a file path.
 > **3. Document** — Word doc (.docx) or other text document.
 > **4. Image or infographic** — Upload the file or paste an image URL.
 > **5. Transcript** — Paste or upload a podcast, interview, or video transcript.
-> **6. Other** — Describe what you have.
+> **6. Content brief / Content Map gap** — Write net-new content from a brief or a gap identified in your Content Map. No existing asset required.
+> **7. Other** — Describe what you have."
 
-Once the input type is confirmed, process the asset fully:
+---
 
-- **URL**: Fetch using WebFetch. Extract full page content, title, meta description, H1, main body, existing CTAs.
+**If options 1–5 or 7 selected — process the existing asset:**
+
+- **URL**: Fetch using WebFetch. Extract full page content, title, meta description, H1, main body, existing CTAs. **Same-domain check**: If the URL's domain matches the saved config domain, note this internally and add "Optimize the original" as an available option in Gate 2 alongside standard remix formats.
 - **PDF**: Read the document. Extract all text, section headings, data points, quotes, and key claims.
 - **Document**: Read the file. Same extraction as PDF.
 - **Image / infographic**: Attempt to read natively using Claude's vision capability. Extract all visible text, data, labels, and structural logic. If native reading fails, notify the user and ask them to provide a text description or alternative format.
 - **Transcript**: Read as-is. Identify speakers (if multiple), key topics, notable quotes, and the core argument or narrative.
 
-After processing, confirm with the user:
+After processing, analyze the asset for funnel stage. Classify it as TOFU, MOFU, or BOFU based on:
+- **TOFU signals**: Educational framing, definitional content, industry trends, "what is X" positioning, soft or no CTA, broad audience
+- **MOFU signals**: Comparative framing, evaluation criteria, best practices, guides, frameworks, vendor assessment language, mid-strength CTA
+- **BOFU signals**: Case studies, ROI/outcome data, product-specific content, pricing or implementation context, strong conversion CTA ("speak to an expert," "request a demo")
 
-> "Here's what I found in this asset: [1–3 sentence summary of the content, its apparent purpose, and its current format/channel]. Does that look right before we continue?"
+Then confirm with the user:
 
-Wait for confirmation before proceeding to Gate 2.
+> "Here's what I found in this asset: [1–3 sentence summary of the content, its apparent purpose, and its current format/channel].
+>
+> **Funnel stage detected: [TOFU / MOFU / BOFU]** — [one sentence rationale, e.g. 'This reads as MOFU — it compares approaches and uses evaluation language, but stops short of a direct conversion ask.']
+>
+> Does that look right before we continue?"
+
+**If yes:** Proceed to Gate 1.5.
+
+**If no:** Use the AskUserQuestion tool:
+- Question: "What's off? I'll fix it before we move on."
+- Options: "Re-fetch the asset" | "I'll paste a correction" | "Something specific is wrong — let me explain"
+
+Wait for the user's response. Update the summary and re-confirm before proceeding.
+
+---
+
+**If option 6 selected — Content brief / Content Map gap:**
+
+This mode writes net-new content from a brief rather than remixing an existing asset. No source asset is required. Research mode is strongly recommended and will be prompted at Gate 6.
+
+**Step 1 — Check for Content Map gaps**
+
+If a Content Map report is loaded, scan it for identified content gaps and recommended net-new pieces. If gaps are found, present them as a numbered list:
+
+> "I found these content gaps in your Content Map. Which one do you want to write?
+>
+> 1. [Gap title] — [funnel stage] — [format recommended] — [one-line rationale]
+> 2. [Gap title] — [funnel stage] — [format recommended] — [one-line rationale]
+> ...
+> [N+1]. None of these — I'll describe what I need"
+
+If the user selects a gap from the map: pre-populate the brief fields below from the gap data (topic, stage, format, audience). Confirm with the user before proceeding. Skip to Gate 2 with the format pre-selected.
+
+If no Content Map is loaded, or the user selects "None of these": run the manual brief intake below.
+
+**Step 2 — Manual brief intake**
+
+Collect the following fields one at a time. Each is asked as a plain question — no selection menus except where noted.
+
+**Topic / Working title** *(required)*
+Ask: "What is this piece about? A working title or topic is fine."
+
+**Target keyword or search query** *(optional but strongly recommended)*
+Ask: "What keyword or question should this rank for? Example: `how to improve medicaid member engagement` or `medicaid member engagement best practices`"
+*To skip, press Enter or type 'skip'.*
+
+**Funnel stage** *(required)*
+Use the AskUserQuestion tool:
+- Question: "What stage of the funnel is this piece for?"
+- Options: "TOFU — awareness / educate" | "MOFU — evaluation / comparison" | "BOFU — conversion / decision"
+
+**Key points or angles to cover** *(optional but improves output significantly)*
+Ask: "Are there specific points, claims, or angles this piece must cover? Paste them as a list or describe in plain text."
+*To skip, press Enter or type 'skip'. If skipped, I'll generate a content outline based on the topic and stage and confirm it with you before writing.*
+
+**Reference URLs** *(optional)*
+Ask: "Are there any competing pages, reference articles, or sources you'd like me to work from or be aware of? Paste URLs separated by commas."
+*To skip, press Enter or type 'skip'.*
+
+If key points were skipped, generate a proposed content outline (H2-level structure appropriate for the confirmed format and funnel stage) and confirm it with the user before writing. Use the AskUserQuestion tool:
+- Question: "Here's the outline I'd use for this piece: [outline]. Does this work, or would you like to adjust it?"
+- Options: "Looks good — let's write it" | "I want to adjust the outline"
+
+**Step 3 — Set the source stage and proceed**
+
+Since the funnel stage was stated in the brief (not detected from a source asset), skip the stage detection step. Lock the output stage to what was provided. Proceed to Gate 2. Gate 1.5 will ask only whether the *output* stage should match the brief stage or differ (e.g., a MOFU brief that the user wants written as a BOFU piece for a specific campaign).
+
+---
+
+### Gate 1.5 — Output Funnel Stage
+
+The source funnel stage is now confirmed. Ask whether the output should target the same stage or be repositioned.
+
+Use the AskUserQuestion tool:
+- Question: "The source is [detected stage]. What stage should the output target?"
+- Options: "Same stage — [TOFU / MOFU / BOFU]" | "Reposition to a different stage" | "It depends on the format I pick"
+
+**If same stage:** Lock the output stage. This drives CTA weight, vocabulary, and internal link targets throughout generation. Proceed to Gate 2.
+
+**If reposition:** Ask: "Which stage?" Present as a numbered list:
+> 1. TOFU — awareness / educate (soft CTAs, no product push)
+> 2. MOFU — evaluation / comparison (criteria-based, mid-strength CTA)
+> 3. BOFU — conversion (direct ask, outcome-focused, demo/expert CTA)
+
+Lock the selected output stage. Note internally: this is a stage reposition — the content framing, CTA strength, vocabulary, and internal link targets will be calibrated to the output stage, not the source.
+
+**If depends on format:** Proceed to Gate 2. After the user selects output format(s), infer the natural stage for each format selected and confirm: "A [format] typically targets [stage] — should I write it that way, or adjust?" Use AskUserQuestion per format if stages conflict across multiple selections.
+
+**How output stage is used throughout generation:**
+- **TOFU output**: Educational tone, no product names in early sections, soft CTA ("learn more," "download the guide"), internal links point toward MOFU content
+- **MOFU output**: Evaluative tone, comparison framing, criteria-led structure, mid-strength CTA ("talk to an expert," "see how it works"), internal links point toward case studies and BOFU pages
+- **BOFU output**: Outcome-focused, specific named results, direct CTA ("request a demo," "speak to an expert"), internal links point toward conversion pages and supporting case studies
 
 ---
 
 ### Gate 2 — Output Format
 
-Ask: "What do you need this to become? You can select one or multiple."
+Present as a numbered list. The user can select one or multiple.
 
-> **1. Social posts** — LinkedIn, X/Twitter, Instagram, or other platform
-> **2. Blog post** — SEO-optimized, repurposed from the source asset
-> **3. Email** — Single email or full sequence
-> **4. Landing page** — Multiple subtypes available
-> **5. White paper / ebook** — Long-form authority document
-> **6. Podcast script** — Solo episode or interview format
-> **7. Presentation / slide deck** — Outline with speaker notes
-> **8. Infographic brief** — Content outline for a visual designer (not a design file)
-> **9. Video / explainer script** — Written for spoken delivery, not reading
-> **10. Other** — Describe what you need
+> "What do you need this to become?
+>
+> **1. Social posts** — LinkedIn, X/Twitter, Instagram, or other platform *(Know intent — built for how people scan feeds)*
+> **2. Blog post** — SEO-optimized, repurposed from the source asset *(Know intent — educational, declarative, built for search)*
+> **3. Email** — Single email or full sequence *(Know / Do intent — awareness through conversion)*
+> **4. Landing page** — Multiple subtypes available *(Evaluate / Do intent — decision and conversion)*
+> **5. White paper** — Research-heavy, authoritative, citation-dense. 3,000–5,000 words, 8–15 designed pages, often gated. *(Evaluate intent — builds the case, structured like a research document)*
+> **6. Ebook** — Educational, step-by-step, chapter-based. 2,000–4,000 words, 15–30 visual pages, scannable. *(Know / Evaluate intent — teaches a framework or process)*
+> **7. Podcast script** — Solo episode or interview format *(Know intent — built for spoken delivery)*
+> **8. Presentation / slide deck** — Outline with speaker notes *(Know / Evaluate intent — live or async delivery)*
+> **9. Infographic brief** — A content outline for a visual designer (not a design file) *(Know intent — visual summary of one idea)*
+> **10. Video / explainer script** — Written for spoken delivery, not reading *(Know / Do intent — short, action-oriented)*
+> **11. Optimize the original** — Improve this content in its current format: stronger EEAT/AEO/GEO signals, tighter copy, internal links added. Delivers a ready-to-publish replacement for the original.
+> **12. Other** — Describe what you need"
+
+Wait for the user's selection(s). If multiple formats selected, confirm all before proceeding. All formats will be produced in a single run and delivered as a tabbed HTML file — one tab per format. "Optimize the original" gets its own tab if selected alongside other formats.
 
 If the user selects **Other**, ask them to describe the format and confirm structure requirements before moving to Gate 3.
-
-If the user selects multiple formats: confirm all selections before proceeding. All formats will be produced in a single run and delivered as a tabbed HTML file — one tab per format.
 
 ---
 
@@ -312,19 +433,33 @@ If the user selects multiple formats: confirm all selections before proceeding. 
 
 **If social posts selected:**
 
-> "Which platform(s)? Select all that apply:
-> 1. LinkedIn
-> 2. X / Twitter
-> 3. Instagram
-> 4. Other — specify"
+Use the AskUserQuestion tool with multiSelect: true:
+- Question: "Which platform(s)? Select all that apply."
+- Options: "LinkedIn" | "X / Twitter" | "Instagram" | "Other — I'll specify"
 
 Then ask: "How many posts per platform?"
 
+---
+
 **If email selected:**
 
-> "Single email or a sequence?"
+Use the AskUserQuestion tool:
+- Question: "Single email or a full sequence?"
+- Options: "Single email" | "Full sequence"
 
-If sequence: "Which funnel stage is this for?"
+**If single email selected:**
+
+Use the AskUserQuestion tool:
+- Question: "What's the goal of this email?"
+- Options: "Deliver a resource" | "Introduce a topic or idea" | "Send an offer or invite" | "Other"
+
+Then use the AskUserQuestion tool:
+- Question: "Where is this person in the funnel?"
+- Options: "Top of funnel — awareness / cold" | "Middle — evaluating options" | "Bottom — near a decision" | "Post-conversion / onboarding"
+
+**If full sequence selected:**
+
+Ask: "Which funnel stage is this for?"
 > 1. TOFU — awareness / nurture (new or cold audience)
 > 2. MOFU — consideration / evaluation (engaged lead)
 > 3. BOFU — conversion (demo, trial, purchase decision)
@@ -340,9 +475,11 @@ Standard defaults (used if user confirms):
 - Re-engagement: 4 emails over 2 weeks
 - Onboarding: 8 emails over 30 days
 
+---
+
 **If landing page selected:**
 
-> "What type of landing page?"
+Ask: "What type of landing page?"
 > 1. Demand gen / paid campaign
 > 2. Webinar or event registration
 > 3. Gated content / resource download
@@ -352,23 +489,45 @@ Standard defaults (used if user confirms):
 > 7. Partner / co-marketing page
 > 8. Other — describe it
 
+---
+
+**If white paper selected:**
+
+Use the AskUserQuestion tool:
+- Question: "What is this white paper's primary purpose?"
+- Options: "Make the case for a solution or approach" | "Present original research or findings" | "Address a specific audience decision" | "Other"
+
+Then ask: "Should this be gated (PDF download behind a form) or fully ungated on the page?"
+
+---
+
+**If ebook selected:**
+
+Use the AskUserQuestion tool:
+- Question: "What is this ebook's primary purpose?"
+- Options: "Teach a framework or process" | "Walk through a step-by-step guide" | "Help the audience evaluate options" | "Other"
+
+Then ask: "Should this be gated or fully ungated?"
+
+---
+
 **If podcast script selected:**
 
-> "Solo episode or interview format?"
-> 1. Solo — I'll write a full scripted episode from the source asset
-> 2. Interview — I'll write a scripted intro/outro and a structured conversation guide
+Use the AskUserQuestion tool:
+- Question: "Solo episode or interview format?"
+- Options: "Solo — full scripted episode from the source asset" | "Interview — scripted intro/outro with a structured conversation guide"
 
 Then ask: "Target episode length? (e.g. 20 minutes, 30 minutes, 45 minutes)"
 
-At 125–150 words per minute, a 20-minute episode = 2,500–3,000 words scripted. I'll use this to calibrate length.
+A 20-minute episode is roughly 2,500–3,000 words. I'll calibrate the script length to your target.
+
+---
 
 **If presentation selected:**
 
-> "What's the context for this presentation?"
-> 1. Live conference or event talk
-> 2. Sales deck (sent async, no live presenter)
-> 3. Internal presentation or thought leadership
-> 4. Webinar deck (with live Q&A)
+Use the AskUserQuestion tool:
+- Question: "What's the context for this presentation?"
+- Options: "Live conference or event talk" | "Sales deck (async, no live presenter)" | "Internal / thought leadership" | "Webinar deck (with live Q&A)"
 
 Then ask: "Target length? (e.g. 20 minutes, 45 minutes)"
 
@@ -376,13 +535,9 @@ Then ask: "Target length? (e.g. 20 minutes, 45 minutes)"
 
 ### Gate 4 — Channel / Distribution Intent
 
-Ask: "Is this for organic or paid distribution?"
-
-> 1. Organic — SEO, social, email, content marketing
-> 2. Paid — Google Ads, LinkedIn Ads, Meta, or other paid channel
-> 3. Both
-
-This shapes tone, CTA strength, and structural decisions. Paid landing pages remove navigation. Organic pages keep it.
+Use the AskUserQuestion tool:
+- Question: "Is this for organic or paid distribution? Paid outputs remove navigation and tighten CTA language. Organic outputs keep navigation and are structured for Google and AI search."
+- Options: "Organic — SEO, social, email, content marketing" | "Paid — Google Ads, LinkedIn Ads, or other paid channel" | "Both"
 
 ---
 
@@ -390,7 +545,12 @@ This shapes tone, CTA strength, and structural decisions. Paid landing pages rem
 
 If config has a primary audience saved: display it and ask "Is this the right audience for this piece, or is it for someone different?"
 
-If no audience is saved: ask "Who is this for? Job title, industry, and what they care about."
+- **If correct:** proceed to Gate 6.
+- **If different:** ask for the new audience description, then use the AskUserQuestion tool:
+  - Question: "Got it. Should I update your default or just use this for the current job?"
+  - Options: "Save as my new default audience" | "This job only — keep my default"
+
+If no audience is saved: ask "Who is this for? Job title, industry, and what they care about most." Then proceed.
 
 Do not skip this gate.
 
@@ -398,39 +558,40 @@ Do not skip this gate.
 
 ### Gate 6 — Research Mode
 
-Always ask before going online. Assess the input asset after Gate 1. Present this gate regardless of asset length — research permission is always explicit, never assumed.
+Use the AskUserQuestion tool:
+- Question: "Would you like me to search for current data or supporting sources to strengthen the output?"
+- Options: "Yes, search online" | "I'll provide additional material" | "Work with what we have"
 
-> "Would you like me to search for current data, statistics, or supporting sources to strengthen these outputs?
->
-> **1. Yes, search online** — I'll find verified, credible sources specific to your industry, show you exactly what I found, and wait for your approval before using anything.
-> **2. You provide more material** — Upload or paste additional source material and I'll use that instead.
-> **3. Work with what we have** — I'll produce the best output possible from the existing asset alone."
+**If "Yes, search online":**
 
-**If Option 1 is selected:**
+Search for statistics, studies, and supporting evidence specific to the user's industry and domain context (derived from config and the source asset's topic). A healthcare company gets healthcare industry sources. A financial firm gets financial sources. Do not pull generic marketing or SEO statistics unless the topic is specifically about marketing.
 
-Search for statistics, studies, and supporting evidence that are specific to the user's industry and domain context (derived from config and the source asset's topic). A healthcare company gets healthcare industry sources. A financial firm gets financial industry sources. Do not pull generic marketing or SEO statistics unless the topic is specifically about marketing.
-
-For every piece of external data or research found, present a citation block before using anything:
+For every piece of external data found, display the citation block first:
 
 ```
 SOURCE: [Publication or organization name]
 URL: [Direct link]
 STAT OR CLAIM: [Exact quote or paraphrase of what was found]
 RELEVANCE: [One sentence explaining why this strengthens the output]
-ACTION: ✅ Approve  ❌ Reject  ✏️ Find a replacement
 ```
 
-Present all citation blocks together before writing a single word of output. Wait for the user to review and action every item. Do not weave any researched stat or claim into the output until it has been explicitly approved. If a stat is rejected, either find a replacement and re-present, or note the gap and continue without it.
+Then use the AskUserQuestion tool for each citation:
+- Question: "What should I do with this source?"
+- Options: "Approve — use it" | "Reject — skip it" | "Find a replacement"
+
+Present all citation blocks before writing a single word of output. Do not weave any researched stat or claim into the output until it has been explicitly approved. If a source is rejected, find a replacement and re-present, or note the gap and continue without it.
+
+**If "I'll provide additional material":** Accept the pasted content or uploaded file. Use it as additional source material alongside the original asset.
+
+**If "Work with what we have":** Proceed with the source asset only. No external research used.
 
 ---
 
 ### Gate 7 — Job Name Confirmation
 
-Propose a job folder name derived from the asset title or URL, with the current date appended:
+Propose a job folder name based on the asset title or URL, with today's date appended. Use plain descriptive words — not technical strings or URL fragments. Example:
 
-> "I'll save this job as: `{asset-slug}-{YYYY-MM-DD}`
->
-> Does that work, or would you like to name it something else?"
+> "I'll save this job as: `hedis-guide-2026-04-06` (your asset title + today's date). Does that work, or would you like to name it something else?"
 
 Wait for confirmation. Create the folder at `content-remix/jobs/{confirmed-name}/` only after the user approves.
 
@@ -443,6 +604,8 @@ Before generating anything, present a confirmation summary:
 > "Here's what I'm about to produce:
 >
 > - **Input**: [asset title or URL]
+> - **Source funnel stage**: [TOFU / MOFU / BOFU]
+> - **Output funnel stage**: [TOFU / MOFU / BOFU — same or repositioned]
 > - **Output**: [format(s) selected]
 > - **Audience**: [confirmed audience]
 > - **Channel**: [organic / paid / both]
@@ -452,11 +615,15 @@ Before generating anything, present a confirmation summary:
 > - **Memory**: [preferences and patterns loaded / no memory yet]
 > - **Job folder**: `content-remix/jobs/{job-name}/`
 >
-> [If auto-applied patterns exist from memory]: Applied automatically from your past edits: [list patterns]
->
-> Ready to go? I'll begin as soon as you confirm."
+> [If auto-applied patterns exist from memory]: Applied automatically from your past edits: [list patterns]"
 
-Do not generate a single word of content until the user confirms.
+Then use the AskUserQuestion tool:
+- Question: "Ready to generate?"
+- Options: "Yes, let's go" | "Let me adjust something first"
+
+**If "Let me adjust something first":** Ask what they want to change. Route back to the appropriate gate. Re-present the summary after the change is made.
+
+Do not generate a single word of content until the user selects "Yes, let's go."
 
 ---
 
@@ -464,53 +631,135 @@ Do not generate a single word of content until the user confirms.
 
 ### Internal Linking
 
-Before generating any output for formats where internal links apply (landing pages, blog posts, white papers, email sequences), run this step first:
+Internal linking is a required output for all applicable formats — never skipped. Run this step before generating any content for landing pages, blog posts, white papers, ebooks, and email sequences.
 
-If the map report is loaded: scan it for pages on the mapped domain that are topically relevant to the piece being created. Identify 3–6 strong candidates. These become the internal link pool.
+**Step 1 — Build the link pool**
 
-For each link inserted into the output:
-- Use descriptive anchor text (never "click here" or "learn more")
-- Place contextually — link where it naturally reinforces the surrounding copy
-- After the output, list all internal links added: "**Internal links added:** [anchor text] → [URL] — [one-sentence rationale]"
+Internal links should cover two categories:
+- **Content pages**: blog posts, guides, white papers, ebooks, case studies, resource pages, FAQs
+- **Company pages**: solution/product pages, about/team pages, contact, demo/speak-to-expert CTAs, partner pages
 
-If no map is loaded: skip internal linking and note at the end: "Internal linking was not applied — no Content Map report found. Run the Content Map Skill to enable this feature."
+Source the link pool in priority order:
 
-Internal linking applies to: landing pages, blog posts, white papers, email sequences.
-Does not apply to: social posts, podcast scripts, presentation outlines, infographic briefs, video scripts.
+1. **Content Map loaded**: Scan the map for topically relevant pages on the saved domain. Identify 3–6 content page candidates and 1–2 company/CTA page candidates. This is the highest-quality source — use it when available.
+
+2. **No Content Map — sitemap available**: Fetch `{saved-domain}/sitemap.xml` using WebFetch. If the sitemap loads, extract all URLs. Categorize them into content pages and company pages. Select the 3–6 most topically relevant content pages and 1–2 company pages as the link pool. Cache this URL list in `content-remix-memory.json` under `domain_pages` so it does not need to be re-fetched each run.
+
+3. **No Content Map — sitemap fails**: The sitemap did not load or was not found. Ask the user once per session (not per run — check memory first):
+
+   > "To add internal links, I need a list of pages on your site. You can paste a list of key URLs, or share your sitemap URL if it's at a different path."
+
+   Save whatever they provide to `content-remix-memory.json` under `domain_pages`. Use it for all runs this session and future sessions until they update it.
+
+4. **No Content Map, no sitemap, no page list provided**: Use WebFetch to crawl the domain's homepage and extract any navigational links (header nav, footer nav, featured links). Use those as a minimal link pool. Note in the output that a sitemap or page list would improve link targeting.
+
+**Step 2 — Insert links**
+
+From the link pool, select the most contextually relevant links for the specific piece being created. For each link inserted:
+- Use descriptive anchor text — never "click here," "learn more," or the raw URL
+- Place contextually — link where it naturally reinforces the surrounding copy, not in a forced block at the end
+- Prefer inline links over a standalone "related links" section; inline links carry more editorial signal for both Google and AI systems
+- Include at least one link to a company/conversion page (solution page, demo, contact) where it fits naturally — not forced, but always considered
+
+**Step 3 — Disclose after output**
+
+After every output, list all internal links added:
+
+> **Internal links added:**
+> - [anchor text] → [URL] — [one-sentence rationale]
+> - [anchor text] → [URL] — [one-sentence rationale]
+
+If the link pool was built from a sitemap or page list rather than the Content Map, note: "Links sourced from site crawl. Run the Content Map Skill for a deeper internal linking architecture with funnel positioning and anchor text strategy."
+
+**Applies to:** landing pages, blog posts, white papers, ebooks, email sequences.
+**Does not apply to:** social posts, podcast scripts, presentation outlines, infographic briefs, video scripts.
 
 ---
 
-### EEAT and AEO Review
+### EEAT, AEO, and GEO Review
 
-After generating content for applicable formats, run a practitioner-level EEAT and AEO review before delivering final output.
+After generating content for applicable formats, run a practitioner-level quality review across three frameworks before delivering output.
 
-**Applies to:** landing pages, blog posts, white papers / ebooks.
+**Applies to:** landing pages, blog posts, white papers, ebooks.
 **Does not apply to:** social posts, emails, podcast scripts, presentations, infographic briefs, video scripts.
 
-**EEAT check — flag if missing:**
-- Author or brand attribution present
-- At least one specific data point, stat, or cited claim
-- Real examples or outcomes referenced (not just generic claims)
-- Trustworthiness signals: date, source citations, contact/about accessible
+---
 
-**AEO check — flag if missing:**
-- H2/H3 headers are declarative (answer a question or make a direct statement)
+**Why this matters:** 59% of Google searches now end without a click. For AI-powered search — ChatGPT, Perplexity, Google AI Overviews — the rate is higher. Being cited in an AI answer IS the distribution. Ranking is no longer enough. Content that fails EEAT, AEO, or GEO doesn't appear in the research layer buyers use to build vendor shortlists — often before they ever visit a website directly.
+
+---
+
+**EEAT — E-E-A-T (Experience, Expertise, Authoritativeness, Trustworthiness)**
+
+Google's framework for evaluating content quality. Flag if missing:
+
+- **Experience**: Does this content reflect real-world, first-hand familiarity with the topic — not just academic description? Can the reader tell this was written by someone who has actually done this? *(This is the most commonly missing signal in B2B content. Academic-sounding description of a topic is not the same as demonstrated experience with it.)*
+- **Expertise**: Does the content demonstrate genuine subject matter expertise? Original data, credible sourcing, or depth that goes beyond what anyone could produce from surface research?
+- **Authoritativeness**: Is the content positioned as a credible source? Author attribution, organizational credibility, and external signals of authority present?
+- **Trustworthiness**: Are claims accurate? Are sources cited? Is the content free of manipulative framing or unsupported assertions?
+
+**YMYL flag**: If the domain or content topic is healthcare, finance, or legal, flag it: "This content is subject to YMYL (Your Money or Your Life) standards — Google applies an elevated quality bar to this category. Every claim must be traceable. Every credential signal must be present. Missing or thin EEAT in YMYL content is treated as a hard quality failure, not a minor gap."
+
+---
+
+**AEO — Answer Engine Optimization**
+
+Optimization for AI-generated answer extraction. Flag if missing:
+
+- H2/H3 headers are declarative — they answer a question or make a direct statement, not just label a section generically
 - Paragraphs are 2–3 sentences max
-- Key sections are self-contained (can be summarized independently)
+- Key sections are self-contained and can be understood independently without surrounding context
 - Schema type recommended for the content (Article, FAQPage, HowTo, etc.)
-- Answer appears before supporting detail (not buried)
+- Answer appears before supporting detail — not buried at the end of a long paragraph
+- Sections are 200–400 words (~300–500 tokens) — the LLM retrieval sweet spot. Sections over 600 words without a structured break risk being chunked unpredictably by AI systems.
+- Each major section includes at least one structured, extractable element: TLDR block, Q&A pair, Definition Block, numbered/bulleted list, or comparison table
 
-If gaps are found, list them after the output under: "**EEAT/AEO gaps to address before publishing:**"
+---
 
-Each gap gets one specific fix recommendation. No vague flags.
+**GEO — Generative Engine Optimization**
+
+Optimization for citation by AI-powered discovery tools: Google AI Overviews, ChatGPT, Perplexity, Gemini, and others. GEO determines whether AI tools actively surface and cite this content in their answers — it goes beyond AEO. Flag if missing:
+
+- Direct extractable answer present in each major section — a reader or AI can pull the key point without reading the full section
+- Named entities referenced — specific people, organizations, products, and studies rather than generic references ("organizations" → specific organization names, "studies show" → "a 2024 study from [named institution]")
+- Factual claims are specific and verifiable — dates, numbers, named outcomes, not vague generalizations ("many companies do this" → "67% of healthcare organizations, per [source]")
+- Structured prose: short sentences, parallel structure, no buried main points
+- Citations or source references present where claims are made
+- Each section is self-contained — no surrounding context required to extract and understand it
+
+---
+
+If gaps are found, list them after the output under: "**EEAT / AEO / GEO gaps to address before publishing:**"
+
+Each gap gets one specific fix recommendation. No vague flags. Label each finding: [EEAT — Experience], [EEAT — Expertise], [EEAT — Trustworthiness], [AEO], [GEO], or [YMYL].
+
+---
+
+### Quality Gate *(internal — runs before delivery, not shown to user unless issues require their input)*
+
+Before delivering any output, run this internal self-review. Only surface items to the user that require their input to resolve.
+
+**Brand voice compliance:**
+Does this output sound like the saved brand voice descriptors? Are any phrases corporate, fluffy, or explicitly off-brand? If yes: rewrite those sections before delivering.
+
+**Accuracy and traceability:**
+Are all claims traceable to the source asset or an approved research source? Are there vague, generic, or filler statements that add length without adding value? If yes: cut or replace before delivering.
+
+**Structure compliance:**
+Does the output follow the correct skeleton for this format? Are all required sections present and clearly labeled? If no: complete or correct before delivering.
+
+**GEO / AEO / EEAT pre-check:**
+Does each major section include a directly extractable answer? Are named entities used instead of generic references where applicable? Is the Experience signal present — does this read like it was written by someone with real-world familiarity, not just surface knowledge? If no: revise before delivering.
+
+Output is delivered only after this pass is complete. If the quality gate finds an issue it cannot self-correct (for example, a claim that requires domain-specific knowledge to verify), surface the specific issue to the user and ask for input before proceeding.
 
 ---
 
 ### Memory Update
 
 After every output that the user accepts without requesting significant changes:
-- Log the output format, job slug, and date to `content-remix-memory.json` under `approved_outputs`
-- Add the job slug to `voice_samples` for future voice calibration reference
+- Log the output format, job name, and date to `content-remix-memory.json` under `approved_outputs`
+- Add the job name to `voice_samples` for future voice calibration reference
 
 After every edit the user requests:
 - Log the edit pattern to `content-remix-memory.json` under `edit_patterns`
@@ -521,9 +770,47 @@ After every pre-run gate completion:
 
 ---
 
+## Optimize Original Mode
+
+This mode produces an improved version of the same content type — not a remix into a different format. It applies all quality checks, tightens copy, strengthens EEAT/AEO/GEO signals, adds internal links, and delivers a ready-to-publish replacement for the original.
+
+**When it activates:**
+- Automatically offered when a submitted URL matches the saved config domain.
+- Always available as a manual selection in Gate 2 (option 11: "Optimize the original").
+- If selected alongside other formats, it is treated as its own output tab in the multi-format HTML file.
+
+**What it produces:**
+- Improved version of the same content type (blog stays blog, landing page stays landing page, etc.)
+- All sections restructured to match the correct output skeleton for that format
+- EEAT, AEO, and GEO gaps addressed throughout
+- Copy tightened: filler cut, claims made specific, structure improved
+- Internal links added
+
+**Internal link handling in Optimize Original mode:**
+
+If Content Map is loaded: scan the map for relevant pages on this domain. Insert 3–6 contextual internal links into the optimized output.
+
+If no Content Map is available: Do not skip this step. Internal linking is a core output of this mode. Ask:
+
+> "To add internal links, I need to know what other pages exist on your site. You can either share your sitemap URL (e.g. `yourdomain.com/sitemap.xml`) and I'll crawl it, or paste a list of your key pages with their URLs."
+
+Use the AskUserQuestion tool:
+- Question: "How should I find pages to link to?"
+- Options: "Share my sitemap URL" | "I'll paste a list of key pages" | "Skip internal links for now"
+
+If the user provides a sitemap URL, fetch it using WebFetch. Extract all URLs. Identify the 5–10 most topically relevant pages to the asset being optimized and use them as the link pool.
+
+**Delivery:** Labeled as "Optimized Original" in the job output. Delivered as a clearly structured copy document with all sections labeled. Followed by a brief summary of changes made and gaps addressed.
+
+---
+
 ## Output Format Standards
 
-Apply the correct structural skeleton for each output type. These are the required structures — do not deviate without a reason.
+Apply the correct structural skeleton for each output type. These are the required structures — do not deviate without a reason. Every output must pass the Quality Gate before delivery.
+
+**Chunk standard:** Each major section should be 200–400 words (~300–500 tokens). This is the LLM retrieval sweet spot. Sections over 600 words without a structured break risk being chunked unpredictably by AI systems and should be split.
+
+**Structured element standard:** Every major section must include at least one directly extractable structured element: TLDR block, Q&A pair, Definition Block, numbered/bulleted list, or comparison table. These are the formats AI systems retrieve most reliably.
 
 ---
 
@@ -545,9 +832,9 @@ For carousel content: deliver one caption + a slide-by-slide content outline (on
 
 **Blog posts**
 One angle per post. Never compress the full source into one post.
-Structure: H1 (question or declarative, keyword-aligned, <65 chars) → Meta description (150–160 chars) → Intro (150–200 words: hook + problem + preview, keyword in first 100 words) → Quick Answer / TL;DR box (2–3 sentences, AEO extraction target) → H2 sections (3–6, 200–400 words each, declarative headings that answer a specific question) → Data / statistics block (at least 1–2 cited stats) → Example or mini case study → Comparison table or checklist (where applicable) → FAQ (4–6 question-format H3s, 50–100 word answers) → Internal links → CTA.
+Structure: H1 (question or declarative, keyword-aligned, <65 chars) → Meta description (150–160 chars) → Intro (150–200 words: hook + problem + preview, keyword in first 100 words) → **Quick Answer / TL;DR block** (2–3 sentences placed immediately after intro — direct extractable answer, AEO/GEO target) → H2 sections (3–6 sections, 200–400 words each, declarative headings that answer a specific question; each section includes at least one structured element) → Data / statistics block (at least 1–2 cited stats with named sources) → Example or mini case study → Comparison table or checklist → FAQ (4–6 question-format H3s, 50–100 word answers each) → Internal links → CTA.
 Target: 1,500–2,500 words.
-Run EEAT/AEO check after generation.
+Run EEAT/AEO/GEO check after generation.
 
 ---
 
@@ -563,20 +850,31 @@ Apply the correct sequence structure for the confirmed funnel stage (see Email S
 **Landing pages**
 Apply the correct subtype skeleton (see Landing Page Skeletons below). Deliver as structured copy blocks, each section clearly labeled with its role (Hero, Value Prop, Social Proof, Form, etc.). Include suggested H1, meta description, and schema type recommendation.
 For paid campaign pages: flag that navigation must be removed before publishing.
-Run EEAT/AEO check after generation for organic subtypes.
+Run EEAT/AEO/GEO check after generation for organic subtypes.
 
 ---
 
-**White paper / ebook**
-Structure: Cover page copy → Executive summary (300–400 words, must stand alone) → Table of contents → Introduction / problem statement (400–600 words) → Background / context section → Main body sections (1,200–2,500 words, the intellectual core) → Case study / proof section → Recommendations (3–5 numbered actions) → Conclusion (200–300 words) → About the author / organization → References → CTA.
+**White paper**
+Research-heavy, authoritative, citation-dense. Academic-adjacent structure.
+Target: 3,000–5,000 words. Designed equivalent: 8–15 pages. Often gated (PDF behind form; page content ungated and crawlable).
+Structure: Cover page copy → Executive summary (300–400 words, must stand alone as a complete document) → **TL;DR: Key Findings** (5–7 bullets — AI extraction target, placed immediately after executive summary) → Table of contents → Introduction / problem statement (400–600 words) → Background / context section (400–600 words) → **Main body sections** (3–5 sections, 300–500 words each; each section has a declarative H2, supporting evidence, and at least one structured element: stat block, definition box, comparison, or bulleted framework) → Case study / proof section (300–500 words, specific named outcomes — not generic results) → Recommendations (3–5 numbered actions, 50–100 words each) → Conclusion (200–300 words) → About the author / organization → References (all cited claims with URLs or publication details) → CTA.
 Deliver as fully written, section-by-section copy. Label each section.
-Run EEAT/AEO check after generation.
+Run EEAT/AEO/GEO check after generation.
+
+---
+
+**Ebook**
+Educational, step-by-step, chapter-based. Designed for visual layouts with callouts, checklists, and visual breaks.
+Target: 2,000–4,000 words. Designed equivalent: 15–30 visual pages. Often gated or partially gated.
+Structure: Cover page copy → Introduction (200–300 words: who this is for, what they'll walk away knowing how to do) → **What you'll learn** (3–5 bullet outcomes — AI extraction target) → Chapter 1–N (each chapter 400–600 words; structured as: chapter title → one-paragraph framing → main content with callout boxes, checklists, or step-by-step breakdowns → **Chapter takeaway** in bold — direct extractable summary) → Summary / recap section (bullet list of all chapter takeaways) → Tools or resources list → CTA.
+Each chapter teaches one concept or step. Do not cover multiple frameworks in a single chapter.
+Run EEAT/AEO/GEO check after generation.
 
 ---
 
 **Podcast script — solo episode**
-Spoken word rate: 125–150 words per minute. Calibrate total script length to the confirmed target duration.
-Cold open / teaser (75–150 words, hook before intro music, no "welcome to the podcast") → [PRODUCED INTRO PLACEHOLDER] → Welcome + episode setup (150–250 words, preview 3–4 main points) → Segment 1: problem / context → Segment 2: insight / framework / findings → Segment 3: practical application → Outro / wrap (150–250 words, summary + show notes CTA + subscribe ask).
+Calibrate total script length to the confirmed target duration (125–150 words per minute spoken delivery).
+Cold open / teaser (75–150 words, hook before intro music — no "welcome to the podcast") → [PRODUCED INTRO PLACEHOLDER] → Welcome + episode setup (150–250 words, preview 3–4 main points) → Segment 1: problem / context → Segment 2: insight / framework / findings → Segment 3: practical application → Outro / wrap (150–250 words, summary + show notes CTA + subscribe ask).
 Label each segment with its name and approximate runtime. Strip all visual references. Use verbal enumeration for lists (never more than 3 items in audio). Convert citations to in-conversation attribution ("according to a 2024 study from...").
 
 **Podcast script — interview episode**
@@ -593,10 +891,9 @@ After the outline, list suggested speaker notes for each content slide (1–3 se
 
 ---
 
-**Infographic brief**
-This is a content document for a visual designer — not a design file.
+**Infographic brief** — a content outline for a visual designer (not a finished design file)
+This document tells the designer exactly what goes on the infographic. The copy is provided. The visual execution is theirs.
 Deliver: Title → Core message (one sentence) → Section breakdown (each section: heading, 1–2 data points or claims, suggested visual treatment description) → Data sources (all stats and claims with citations) → CTA copy → Brand voice notes.
-The brief tells the designer exactly what goes on the infographic. The copy is provided. The visual execution is theirs.
 
 ---
 
@@ -618,7 +915,9 @@ Ask for structure requirements before generating anything. Confirm the structure
 Deliver the output directly in-chat, clearly structured with labeled sections. Save to `content-remix/jobs/{job-name}/output/` as a `.md` file.
 
 **Multi-format run (two or more formats):**
-Save all outputs as a single tabbed HTML file at `content-remix/jobs/{job-name}/output/remix-output.html`. One tab per format. Each tab contains the full output for that format, with sections clearly labeled. Also display a brief in-chat summary confirming what was saved and where.
+Save all outputs as a single tabbed HTML file at `content-remix/jobs/{job-name}/output/remix-output.html`. One tab per format. Each tab contains the full output for that format, with sections clearly labeled. Display a brief in-chat summary confirming what was saved and where.
+
+> **To open the HTML file:** Drag it into any browser window — Chrome, Safari, or Firefox. No server required.
 
 HTML file requirements:
 - Clean, minimal design. No distracting styling.
@@ -632,7 +931,7 @@ HTML file requirements:
 
 > **Job saved:** `content-remix/jobs/{job-name}/`
 >
-> [If EEAT/AEO gaps were found]: **Before publishing, address the gaps flagged above.**
+> [If EEAT/AEO/GEO gaps were found]: **Before publishing, address the gaps flagged above.**
 >
 > [If internal links were added]: **Internal links added — review before publishing to confirm URLs are current.**
 >
@@ -663,7 +962,7 @@ Hero (H1 keyword-aligned, differentiator sub-headline, primary CTA) → Problem 
 ~1,200–2,000 words. Navigation stays.
 
 **Organic SEO content page (long-form, ungated):**
-H1 (declarative or question, keyword-aligned) → Quick answer box (100–150 words, answers the H1 directly, AI extraction target) → Main H2 sections (3–6 sections, 200–400 words each, each H2 answers a specific sub-question) → Data / research block → Example or mini case study → Comparison table or checklist → FAQ (5–8 H3s in question format, 2–4 sentence answers) → Internal link block (3–4 contextually relevant links) → Soft CTA.
+H1 (declarative or question, keyword-aligned) → **Quick answer box** (100–150 words, answers the H1 directly, AI extraction target) → Main H2 sections (3–6 sections, 200–400 words each, each H2 answers a specific sub-question) → Data / research block → Example or mini case study → Comparison table or checklist → FAQ (5–8 H3s in question format, 2–4 sentence answers) → Internal link block (3–4 contextually relevant links) → Soft CTA.
 ~1,500–3,000 words. Schema: Article + FAQPage.
 
 **Podcast landing page — show homepage:**
@@ -731,29 +1030,58 @@ Rules: One action per email. 100–200 words max. Behavioral triggers outperform
 
 | User action | What happens |
 |---|---|
-| First launch with no config | Onboarding detection question first, then 6 setup steps |
+| First launch with no config | Greeting first → brand doc detection question → 6 setup steps |
+| First launch — no Content Map found | Map notice is suppressed during onboarding. Shown only at the start of the first job run, after setup is complete. |
 | `/content-remix` with config present | Loads config + memory silently, checks for map report, presents return launch prompt |
 | `/content-remix-setup` | Opens reconfiguration for every field |
 | `/content-remix-reset-memory` | Clears `content-remix-memory.json`, confirms to user, config is not affected |
+| Onboarding optional field skipped | "To skip, press Enter or type 'skip'" shown at each step. Callout displayed (except off-limits and additional context). |
+| Config save | Full field summary table displayed before proceeding. User can verify or reconfigure before first run. |
 | Asset provided without going through pre-run gates | Run pre-run workflow from Gate 1 before processing anything |
-| User selects multiple output formats | All formats produced in one run, delivered as tabbed HTML file |
-| Landing page selected | Always follow immediately with subtype question (Gate 3) |
-| Email selected | Always ask: single or sequence? If sequence: funnel stage? How many? |
-| Social post selected | Always ask: platform(s)? How many posts? |
-| Podcast script selected | Always ask: solo or interview? Target length? Use 125–150 WPM to calibrate word count. |
-| Presentation selected | Always ask: context / subtype? Target length? |
-| Gate 6 (research mode) | Always ask before going online — explicit yes or no required every run |
-| Research approved | Search for industry-specific sources, present citation blocks, wait for approval before using |
-| Research stat rejected | Find replacement and re-present, or note gap and continue |
+| Gate 1 — asset processed | Detect funnel stage (TOFU/MOFU/BOFU) from content signals. Surface in the confirmation summary with a one-sentence rationale. |
+| Gate 1 — user confirms asset summary + stage | Proceed to Gate 1.5. |
+| Gate 1 — user says asset summary is wrong | AskUserQuestion: Re-fetch / Paste correction / Explain what's wrong. Correct and re-confirm before proceeding. |
+| Gate 1 — URL matches saved config domain | Note same-domain match. Add "Optimize the original" as an option in Gate 2. |
+| Gate 1.5 — output funnel stage | AskUserQuestion: Same stage / Reposition to different stage / Depends on format. Locks output stage before Gate 2. |
+| Gate 1.5 — stage reposition selected | Numbered list: TOFU / MOFU / BOFU. Lock selected stage. Note internally: calibrate CTA, vocabulary, and internal links to output stage, not source. |
+| Gate 1.5 — depends on format | Confirm per format after Gate 2 selection. Flag conflicts if multiple formats with different natural stages are selected. |
+| Output stage — TOFU | Soft CTAs, educational tone, no product push, internal links → MOFU content |
+| Output stage — MOFU | Evaluative tone, comparison framing, mid-strength CTA, internal links → case studies and BOFU pages |
+| Output stage — BOFU | Outcome-focused, specific results, direct CTA (demo/expert), internal links → conversion pages and case studies |
+| Gate 2 — format selection | Numbered list (12 options). Wait for selection(s). Confirm all before proceeding. |
+| Gate 2 — white paper selected | Gate 3: AskUserQuestion — primary purpose (4 options). Then gating question. |
+| Gate 2 — ebook selected | Gate 3: AskUserQuestion — primary purpose (4 options). Then gating question. |
+| Gate 2 — email selected | Gate 3: AskUserQuestion — single or sequence? (2 options) |
+| Gate 2 — single email selected | Gate 3: AskUserQuestion — email goal (4 options). Then AskUserQuestion — funnel stage (4 options). |
+| Gate 2 — full sequence selected | Gate 3: numbered list — funnel stage (5 options). Then standard length or custom. |
+| Gate 2 — podcast selected | Gate 3: AskUserQuestion — solo or interview? (2 options). Then target length. |
+| Gate 2 — presentation selected | Gate 3: AskUserQuestion — context / subtype (4 options). Then target length. |
+| Gate 2 — social posts selected | Gate 3: AskUserQuestion multiSelect — platform(s) (4 options). Then number of posts. |
+| Gate 2 — landing page selected | Gate 3: numbered list — subtype (8 options) |
+| Gate 2 — "Optimize the original" selected | Route to Optimize Original mode. If selected with other formats, treat as its own output tab. |
+| Gate 2 — multiple formats selected | All formats produced in one run, delivered as tabbed HTML file |
+| Gate 4 — distribution channel | AskUserQuestion: Organic / Paid / Both (3 options). Explanation of impact shown in question. |
+| Gate 5 — audience confirmed as correct | Proceed to Gate 6 |
+| Gate 5 — user provides different audience | AskUserQuestion: Save as new default / This job only (2 options) |
+| Gate 6 — research mode | AskUserQuestion: Yes search / Provide material / Work with what we have (3 options) |
+| Gate 6 — research approved | Search for industry-specific sources. AskUserQuestion per citation: Approve / Reject / Find replacement |
+| Gate 6 — research stat rejected | Find replacement and re-present, or note gap and continue |
+| Gate 7 — job name | Propose plain-language name: `{topic}-{YYYY-MM-DD}`. User confirms or renames. |
 | Audit / map report found | Load silently. Use for keyword context, internal links, funnel stage, EEAT gaps, brand voice |
-| No map report found | Display one-time notice per session. Do not repeat. Do not block. |
+| No map report found (return run) | Display one-time notice per session. Do not repeat. Do not block. |
 | Image or infographic submitted | Attempt native Claude vision reading first. Ask for description only if native reading fails. |
-| Internal linking (landing page, blog, white paper, email) | Pull from map report if loaded; list all links added with rationale after output |
-| No map loaded for internal linking | Skip and note at end of output |
-| EEAT/AEO check | Runs after generation for landing pages, blog posts, white papers only |
+| Internal linking (landing page, blog, white paper, ebook, email) | Always attempted. Priority order: Content Map → sitemap crawl → user-provided page list → homepage nav crawl. Covers content pages AND company/CTA pages. |
+| Internal link pool — Content Map loaded | Scan map for topically relevant content pages (3–6) + company pages (1–2). Highest-quality source. |
+| Internal link pool — no map, sitemap found | Fetch `{domain}/sitemap.xml`. Categorize URLs. Select content + company page candidates. Cache in memory. |
+| Internal link pool — sitemap fails | Ask user for key page list once per session. Save to memory. Reuse across runs. |
+| Internal link pool — no map, no sitemap, no page list | Crawl homepage nav links as minimal fallback. Note limitation in output. |
+| Optimize Original mode — internal links | Same priority order. If no map, ask for sitemap or page list before generating. |
+| EEAT/AEO/GEO check | Runs after generation for landing pages, blog posts, white papers, ebooks only |
+| YMYL content detected | Quality gate flags elevated EEAT standard. Applies to healthcare, finance, and legal domains/topics. |
+| Quality Gate | Runs internally before every delivery. User only sees it if issues require their input to resolve. |
 | Single format output | Delivered in-chat + saved as .md in job output folder |
-| Multi-format output | Saved as tabbed HTML file in job output folder + brief in-chat summary |
-| Job folder naming | Skill proposes {asset-slug}-{YYYY-MM-DD}. User confirms or renames. Folder created only after confirmation. |
+| Multi-format output | Saved as tabbed HTML file in job output folder + brief in-chat summary + browser open instructions |
+| Optimize Original mode | Produces improved version of same format. Adds internal links via map, sitemap, or page list. Delivered as labeled copy doc with summary of changes. |
 | Output accepted without significant edits | Log to memory: approved output, voice sample |
 | Edit requested by user | Log edit pattern to memory. Auto-apply after 3 occurrences. |
 | Consistent format preference detected | Surface as default in pre-run gates after 3 consistent choices |
@@ -761,3 +1089,14 @@ Rules: One action per email. 100–200 words max. Behavioral triggers outperform
 | Skipping off-limits or additional context field | No flag, no friction, move forward |
 | Every setup completion | Display explicit reminder that `/content-remix-setup` is available at any time |
 | Brand doc provided at onboarding start | Extract brand voice, audience, ICP — skip those onboarding steps — confirm what was captured |
+| Gate 1 — option 6 selected (content brief) | Run Content Brief intake flow. No source asset required. Skip asset summary confirmation step. |
+| Gate 1 option 6 — Content Map loaded | Scan map for identified gaps. Present as numbered list. User selects gap → pre-populate topic, keyword, and funnel stage from map data. |
+| Gate 1 option 6 — no Content Map loaded | Skip gap scan. Proceed directly to manual brief intake. |
+| Content brief intake — topic | Required field. Collected first. Cannot skip. |
+| Content brief intake — target keyword | Optional. "To skip, press Enter or type 'skip'." |
+| Content brief intake — funnel stage | AskUserQuestion: TOFU / MOFU / BOFU / Not sure. Stated in brief — not detected from asset. |
+| Content brief intake — key points | Optional. "To skip, press Enter or type 'skip'." If skipped → generate outline before writing. |
+| Content brief intake — reference URLs | Optional. "To skip, press Enter or type 'skip'." |
+| Content brief — key points skipped | Generate content outline. AskUserQuestion: Looks good, write it / Let me add key points first. Wait for confirmation before generating content. |
+| Content brief — funnel stage stated | Do not run Gate 1.5 stage detection. Funnel stage is already locked from brief intake. |
+| Content brief — research mode prompt | Prompt differently: "Research is strongly recommended for net-new content. Go online to find supporting data, stats, and examples?" AskUserQuestion: Yes, search online / I'll provide references / Skip research. |
