@@ -63,6 +63,8 @@ They work independently — but together they close the full loop: see clearly, 
 
 **v1.0** — Initial release. Pre-run workflow with seven gates; ten channel-native output formats; memory/learning system; research mode with citation blocks; brand voice extraction from docs/URLs; tabbed HTML output for multi-format jobs; job folder naming and output saving.
 
+Full history: [CHANGELOG.md](CHANGELOG.md)
+
 ---
 
 ## Install
