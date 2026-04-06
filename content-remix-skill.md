@@ -52,13 +52,13 @@ When paired with the Content Map Skill, your output is grounded in keyword strat
 
 **On every invocation, before anything else:**
 
-1. Fetch `https://raw.githubusercontent.com/drew-rewired/content-map/main/bonus/version.txt` using WebFetch.
+1. Fetch `https://raw.githubusercontent.com/drew-rewired/content-remix/main/version.txt` using WebFetch.
 2. Compare the returned version string against the version in this file's header (`2.1`).
 3. If the fetched version is newer, display this notice once and then continue normally:
 
 > "**Update available:** A newer version of the Content Remix Skill (v[X.X]) is available. To update, run this in your terminal:
 > ```
-> curl -fsSL https://raw.githubusercontent.com/drew-rewired/content-map/main/bonus/content-remix-skill.md -o ~/.claude/commands/content-remix.md
+> curl -fsSL https://raw.githubusercontent.com/drew-rewired/content-remix/main/content-remix-skill.md -o ~/.claude/commands/content-remix.md
 > ```
 > Then restart Claude Code. You can continue using this session without updating."
 
