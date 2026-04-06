@@ -151,19 +151,17 @@ You are presented with your saved config and memory state, then dropped straight
 | Format | What it produces |
 |---|---|
 | Blog post | Full-length SEO-structured post with declarative H2/H3s, TL;DR block, short paragraphs, internal links, and meta description |
-| Email — single | One email with goal and funnel stage confirmed before writing: subject, preview text, body, CTA |
-| Email sequence | 3–5 email series with subject lines, preview text, and body copy — each email has one job |
-| LinkedIn posts | Platform-native posts with hook, body, and CTA; no hashtag spam; written for scroll-stop |
-| Social posts | Platform-specific copy for any channel; asks for platform and post count before writing |
+| Email | Single email or full sequence (3–5 emails) — goal and funnel stage confirmed before writing; each email has one job |
+| Social posts | Platform-native posts for LinkedIn, X/Twitter, Instagram, or any channel — asks for platform and post count before writing |
+| Landing page | Full page copy with hero, body sections, proof points, and CTA — asks for subtype before writing |
 | White paper | Research-heavy, authoritative, citation-dense, 3,000–5,000 words. Executive summary, problem statement, analysis, recommendations. |
 | Ebook | Educational, step-by-step, 2,000–4,000 words. Chapter-based structure with callouts, checklists, and visual breaks. |
-| Landing page | Full page copy with hero, body sections, proof points, and CTA — asks for subtype before writing |
 | Podcast script | Solo or interview format; calibrated to target duration; verbal enumeration, no visual references |
-| Presentation outline | Slide-by-slide structure with talking points — asks for context and target length |
+| Presentation / slide deck | Slide-by-slide structure with speaker notes — asks for context and target length |
+| Infographic brief | Content document for a visual designer: title, section breakdown, data points, suggested visual treatments, CTA copy |
 | Video / explainer script | 5-sec hook, problem statement, solution narrative, proof points, CTA; written for spoken delivery |
-| Infographic brief | Content document for a designer: title, section breakdown, data points, suggested visual treatments, CTA copy |
-| Ad copy variants | Platform-native ad copy with headline, body, and CTA variants — asks for platform and match type |
 | Optimize Original | Improved version of the same format — better structure, EEAT/AEO/GEO signals, internal links added, copy tightened |
+| Other | Describe any format not listed — the skill confirms structure requirements before writing |
 
 ---
 

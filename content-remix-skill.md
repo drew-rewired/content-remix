@@ -432,6 +432,8 @@ If key points were skipped, generate a proposed content outline (H2-level struct
 - Question: "Here's the outline I'd use for this piece: [outline]. Does this work, or would you like to adjust it?"
 - Options: "Looks good — let's write it" | "I want to adjust the outline"
 
+If "I want to adjust the outline": ask "What would you like to change?" Accept their edits in plain text — add, remove, or reorder sections. Revise the outline and re-confirm using the same AskUserQuestion before writing.
+
 **Step 3 — Set the source stage and proceed**
 
 Since the funnel stage was stated in the brief (not detected from a source asset), skip the stage detection step. Lock the output stage to what was provided. Proceed to Gate 2. Gate 1.5 will ask only whether the *output* stage should match the brief stage or differ (e.g., a MOFU brief that the user wants written as a BOFU piece for a specific campaign).
@@ -490,6 +492,11 @@ If the user selects **Other**, ask them to describe the format and confirm struc
 ---
 
 ### Gate 3 — Output Subtype *(only asked for formats with subtypes)*
+
+**Formats that skip Gate 3 entirely — go straight to Gate 4:**
+Blog post, video / explainer script, infographic brief, optimize original. For "Other" — if the user already described their format at Gate 2, proceed to Gate 4 without asking again.
+
+---
 
 **If social posts selected:**
 
@@ -859,6 +866,14 @@ Use the AskUserQuestion tool:
 - Options: "Share my sitemap URL" | "I'll paste a list of key pages" | "Skip internal links for now"
 
 If the user provides a sitemap URL, fetch it using WebFetch. Extract all URLs. Identify the 5–10 most topically relevant pages to the asset being optimized and use them as the link pool.
+
+**Gate flow for Optimize Original:**
+- Gate 3: Skip — no subtype questions needed.
+- Gate 4: Run — organic vs. paid affects CTA density and navigation.
+- Gate 5: Run — audience confirmation applies.
+- Gate 6: Run — research mode applies (especially useful for adding cited stats).
+- Gate 7: Run — job naming applies.
+- Gate 1.5: Skip if Optimize Original is the only selection — output stage matches source. If selected alongside other formats, Gate 1.5 applies to the other formats only.
 
 **Delivery:** Labeled as "Optimized Original" in the job output. Delivered as a clearly structured copy document with all sections labeled. Followed by a brief summary of changes made and gaps addressed.
 
