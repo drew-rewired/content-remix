@@ -12,7 +12,7 @@ Licensed under CC BY-NC 4.0 — free to use and modify; commercial use and resal
 
 **Slash command**: `/content-remix`
 **Reconfigure at any time**: `/content-remix-setup`
-**Version**: 2.0
+**Version**: 2.1
 
 ---
 
@@ -53,7 +53,7 @@ When paired with the Content Map Skill, your output is grounded in keyword strat
 **On every invocation, before anything else:**
 
 1. Fetch `https://raw.githubusercontent.com/drew-rewired/content-map/main/bonus/version.txt` using WebFetch.
-2. Compare the returned version string against the version in this file's header (`2.0`).
+2. Compare the returned version string against the version in this file's header (`2.1`).
 3. If the fetched version is newer, display this notice once and then continue normally:
 
 > "**Update available:** A newer version of the Content Remix Skill (v[X.X]) is available. To update, run this in your terminal:
@@ -280,7 +280,67 @@ This workflow runs before any content is generated. Every gate is a selection pr
 
 ### Gate 1 — Input
 
-Present as a numbered list and wait for the user's selection:
+**Before showing any menu — analyze what the user dropped in.**
+
+If the user has already provided something (a URL, a file, pasted text, or a spreadsheet), analyze it first and form a hypothesis. Do not ask the user to categorize their own input. Only show the numbered menu if the input is ambiguous or nothing was provided.
+
+---
+
+**Detection logic:**
+
+| What you see | Treat as |
+|---|---|
+| Tabular or list structure with funnel stage indicators (TOFU/MOFU/BOFU, Top/Mid/Bottom, Awareness/Consideration/Decision, or similar) AND a status or priority column (any labels — infer meaning from context) | Prioritized content list → route to queue mode below |
+| Single URL | Single asset — proceed to single asset processing. Same-domain check applies. |
+| Single PDF or document | Single asset — unless it contains a multi-row content list with stage and status columns, in which case treat as a prioritized content list |
+| Text describing a topic, working title, or keyword without an existing URL or file | Content brief → skip to Content Brief mode |
+| Ambiguous, unclear, or nothing provided yet | Show the numbered menu below |
+
+---
+
+**If a prioritized content list is detected — queue mode:**
+
+Parse the list. Infer column meanings from context — column names will vary. Extract: stage, title, status/priority, URL (if present) per row.
+
+Normalize status labels to internal routing:
+- Labels signaling **"doesn't exist yet"** (e.g. net new, gap, missing, todo, to build) → Content Brief mode
+- Labels signaling **"major work needed"** (e.g. rewrite, overhaul, upgrade, rebuild, priority 1) → fetch URL + Optimize Original or full remix
+- Labels signaling **"minor work needed"** (e.g. tweak, optimize, update, refresh, priority 2) → fetch URL + Optimize Original
+- Labels signaling **"leave as-is"** (e.g. keep, done, published, live, no action) → skip
+
+If a status label is ambiguous, note it in the queue and ask the user to confirm the routing before starting.
+
+Present the full queue as a table before processing anything:
+
+> "Looks like a prioritized content list — [N] pieces across [stages]. Here's how I'd queue them:
+>
+> | # | Title | Stage | Status | Workflow |
+> |---|---|---|---|---|
+> | 1 | [Title] | [Stage] | [their label] | [mapped workflow] |
+> | 2 | [Title] | [Stage] | [their label] | Content Brief |
+> | 3 | [Title] | [Stage] | [their label] | Skipping — leave as-is |
+> ...
+>
+> Ready to work through these?"
+
+Use the AskUserQuestion tool:
+- Question: "Ready to work through these?"
+- Options: "Work through in order" | "Let me pick where to start"
+
+If "Work through in order": start with item 1, run its mapped workflow end-to-end (all gates), deliver output, then return here and confirm the next item before starting it.
+
+If "Let me pick where to start": present the queue as a numbered list and wait for selection. Run that item's workflow, then ask which to do next.
+
+Skip "leave as-is" items automatically — they appear in the queue table for reference but are not processed.
+
+After completing each item, show a brief progress summary:
+> "Done — [N] of [total] complete. [Title] → [format delivered]. Next up: [next title] ([workflow]). Continue?"
+
+Use the AskUserQuestion tool: "Continue to next item" | "I need a break — save my place" | "I'm done for now"
+
+---
+
+**If no input was provided, or input is ambiguous — show the numbered menu:**
 
 > "What are you working with?
 >
@@ -289,7 +349,7 @@ Present as a numbered list and wait for the user's selection:
 > **3. Document** — Word doc (.docx) or other text document.
 > **4. Image or infographic** — Upload the file or paste an image URL.
 > **5. Transcript** — Paste or upload a podcast, interview, or video transcript.
-> **6. Content brief / Content Map gap** — Write net-new content from a brief or a gap identified in your Content Map. No existing asset required.
+> **6. Content brief** — Write net-new content from a brief or a gap identified in your content map. No existing asset required.
 > **7. Other** — Describe what you have."
 
 ---
@@ -1038,6 +1098,15 @@ Rules: One action per email. 100–200 words max. Behavioral triggers outperform
 | Onboarding optional field skipped | "To skip, press Enter or type 'skip'" shown at each step. Callout displayed (except off-limits and additional context). |
 | Config save | Full field summary table displayed before proceeding. User can verify or reconfigure before first run. |
 | Asset provided without going through pre-run gates | Run pre-run workflow from Gate 1 before processing anything |
+| Gate 1 — input provided | Analyze before showing any menu. Detect type from structure. Show menu only if ambiguous or nothing provided. |
+| Gate 1 — prioritized content list detected | Tabular/list structure with funnel stage indicators and status/priority column. Route to queue mode. |
+| Gate 1 — queue mode | Parse list, normalize status labels to workflows, present full queue as table, AskUserQuestion to start. Work through items one at a time. |
+| Gate 1 — queue item: "doesn't exist yet" status | Route to Content Brief mode for that item. |
+| Gate 1 — queue item: "major work needed" status | Fetch URL + Optimize Original or full remix. |
+| Gate 1 — queue item: "minor work needed" status | Fetch URL + Optimize Original. |
+| Gate 1 — queue item: "leave as-is" status | Skip. Note in queue table. Do not process. |
+| Gate 1 — ambiguous status label in queue | Flag in queue table. Ask user to confirm routing before starting that item. |
+| Gate 1 — queue progress | After each item: show progress summary (N of total done), confirm next before starting. |
 | Gate 1 — asset processed | Detect funnel stage (TOFU/MOFU/BOFU) from content signals. Surface in the confirmation summary with a one-sentence rationale. |
 | Gate 1 — user confirms asset summary + stage | Proceed to Gate 1.5. |
 | Gate 1 — user says asset summary is wrong | AskUserQuestion: Re-fetch / Paste correction / Explain what's wrong. Correct and re-confirm before proceeding. |

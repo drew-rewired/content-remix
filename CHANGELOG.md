@@ -4,6 +4,18 @@ All notable changes to the Content Remix Skill are documented here.
 
 ---
 
+## [2.1] — 2026-04-06
+
+### Added
+- **Detection-first Gate 1** — The skill now analyzes what you drop in before showing any menu. If it can identify the input type from structure, it routes directly and confirms with you. The numbered menu is a fallback for ambiguous inputs only.
+- **Prioritized content list queue mode** — When a spreadsheet, table, or structured doc is detected with funnel stage indicators and status/priority flags, the skill queues all pieces automatically. Each piece is routed to the right workflow based on the status label's meaning (new content → Content Brief, major work → Optimize Original or remix, minor work → Optimize Original, leave as-is → skip). Works with any column names and any status labels — meaning is inferred from context.
+- **Queue progress tracking** — After each item completes, a progress summary is shown and the user confirms before the next item begins.
+
+### Changed
+- Numbered input menu demoted to fallback — only shown when input is ambiguous or nothing has been provided yet.
+
+---
+
 ## [2.0] — 2026-04-06
 
 ### Added

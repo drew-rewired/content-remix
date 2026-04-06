@@ -9,7 +9,7 @@
 
 <br>
 
-<img src="https://img.shields.io/badge/version-2.0-000000?style=flat-square" alt="version">&nbsp;<img src="https://img.shields.io/badge/free-open%20source-111111?style=flat-square" alt="free">&nbsp;<img src="https://img.shields.io/badge/Claude%20Code-skill-CC0000?style=flat-square" alt="Claude Code skill">
+<img src="https://img.shields.io/badge/version-2.1-000000?style=flat-square" alt="version">&nbsp;<img src="https://img.shields.io/badge/free-open%20source-111111?style=flat-square" alt="free">&nbsp;<img src="https://img.shields.io/badge/Claude%20Code-skill-CC0000?style=flat-square" alt="Claude Code skill">
 
 <br>
 
@@ -58,6 +58,8 @@ They work independently — but together they close the full loop: see clearly, 
 ---
 
 ## Version highlights
+
+**v2.1** — Detection-first Gate 1: the skill now analyzes what you drop in before showing any menu. Recognizes a prioritized content list (spreadsheet, table, or structured doc with funnel stages and status flags) and queues all pieces automatically — routing each one to the right workflow (Content Brief for new pieces, Optimize Original or full remix for rewrites, skip for leave-as-is). Works with any status labels, any column names. Falls back to the numbered menu only if input is ambiguous.
 
 **v2.0** — Major update. Funnel stage detection from source asset; Gate 1.5 for output stage lock; 12 output formats (white paper and ebook now separate; Optimize Original added); Content Brief mode for net-new content without a source asset; Content Map gap integration for brief pre-population; internal linking waterfall (Content Map → sitemap crawl → user page list → homepage nav); GEO (Generative Engine Optimization) added as third quality framework alongside EEAT and AEO; YMYL elevated quality flag for healthcare, finance, and legal content; Quality Gate (internal self-review before delivery); AskUserQuestion interactive prompts throughout gates; per-section chunk targets (200–400 words) in all output skeletons.
 
