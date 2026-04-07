@@ -19,6 +19,22 @@
 
 ---
 
+**Mac / Linux**
+
+```bash
+mkdir -p ~/.claude/commands && curl -fsSL https://raw.githubusercontent.com/drew-rewired/content-remix/main/content-remix-skill.md -o ~/.claude/commands/content-remix.md
+```
+
+**Windows**
+
+```powershell
+curl.exe -fsSL https://raw.githubusercontent.com/drew-rewired/content-remix/main/content-remix-skill.md -o "$env:USERPROFILE\.claude\commands\content-remix.md"
+```
+
+Restart Claude Code. Onboarding starts automatically.
+
+---
+
 ## What this is
 
 A Claude Code slash command skill that takes any existing content asset and remixes it into every channel and format you need. Drop in a URL, upload a PDF, or paste in text — the skill walks through a pre-run workflow to lock in format, audience, channel intent, and research mode before generating anything.
@@ -29,31 +45,9 @@ This is not a content creation tool. It is a content multiplication tool.
 
 ---
 
-## Why it was built
+## Skill flow
 
-Most content programs are built around producing. A white paper gets written, published, and left alone. A blog post lives as a blog post. The same ideas, research, and expertise sit in one format and never get repurposed into the channels where your audience actually spends time.
-
-The Content Remix Skill changes that. Every asset you already have is a source of ten more. A white paper becomes a blog series, an email sequence, a LinkedIn campaign, a podcast script, a landing page, and ad copy — all channel-native, all built from work you already did.
-
-No new research. No new ideas. Just existing assets working harder.
-
----
-
-## Who this is for
-
-- **Content strategists** who want to maximize the reach of existing assets without adding production time
-- **Digital marketers** running multi-channel programs who need format-native content for each channel
-- **Email and social media managers** who are constantly pulling content from longer-form assets
-- **Solo operators and small teams** without the bandwidth to reformat everything manually
-- **Anyone sitting on a library of underperforming assets** that could be doing more across more channels
-
----
-
-## Pairs with Content Map
-
-This skill is designed to work alongside the **[Content Map Skill](https://github.com/drew-rewired/content-map)**. The Content Map Skill audits your full content program, identifies which assets to fix, reposition, or ungate, and surfaces what is underperforming or invisible to search. Once you know what to act on, the Content Remix Skill takes those assets and rebuilds them for every channel and format you need.
-
-They work independently — but together they close the full loop: see clearly, then act fast.
+Pairs with the **[Content Map Skill](https://github.com/drew-rewired/content-map)** — the map audits your full content program and tells you what to act on. Remix takes those assets and rebuilds them for every channel and format you need. They work independently, but together they close the full loop: see clearly, then act fast.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
@@ -110,47 +104,13 @@ They work independently — but together they close the full loop: see clearly, 
 
 ---
 
-## Version highlights
+## Who this is for
 
-**v2.1** — Detection-first Gate 1: the skill now analyzes what you drop in before showing any menu. Recognizes a prioritized content list (spreadsheet, table, or structured doc with funnel stages and status flags) and queues all pieces automatically — routing each one to the right workflow (Content Brief for new pieces, Optimize Original or full remix for rewrites, skip for leave-as-is). Works with any status labels, any column names. Falls back to the numbered menu only if input is ambiguous.
-
-**v2.0** — Major update. Funnel stage detection from source asset; Gate 1.5 for output stage lock; 12 output formats (white paper and ebook now separate; Optimize Original added); Content Brief mode for net-new content without a source asset; Content Map gap integration for brief pre-population; internal linking waterfall (Content Map → sitemap crawl → user page list → homepage nav); GEO (Generative Engine Optimization) added as third quality framework alongside EEAT and AEO; YMYL elevated quality flag for healthcare, finance, and legal content; Quality Gate (internal self-review before delivery); AskUserQuestion interactive prompts throughout gates; per-section chunk targets (200–400 words) in all output skeletons.
-
-**v1.0** — Initial release. Pre-run workflow with seven gates; ten channel-native output formats; memory/learning system; research mode with citation blocks; brand voice extraction from docs/URLs; tabbed HTML output for multi-format jobs; job folder naming and output saving.
-
-Full history: [CHANGELOG.md](CHANGELOG.md)
-
----
-
-## Install
-
-### Mac / Linux
-
-```bash
-mkdir -p ~/.claude/commands && curl -fsSL https://raw.githubusercontent.com/drew-rewired/content-remix/main/content-remix-skill.md -o ~/.claude/commands/content-remix.md
-```
-
-Restart Claude Code. Onboarding starts automatically on next launch.
-
----
-
-### Windows
-
-```powershell
-curl.exe -fsSL https://raw.githubusercontent.com/drew-rewired/content-remix/main/content-remix-skill.md -o "$env:USERPROFILE\.claude\commands\content-remix.md"
-```
-
----
-
-### Manual
-
-[**Download content-remix-skill.md →**](https://raw.githubusercontent.com/drew-rewired/content-remix/main/content-remix-skill.md) *(right-click → Save As)*
-
-Place the file in:
-- **Mac / Linux**: `~/.claude/commands/`
-- **Windows**: `%USERPROFILE%\.claude\commands\`
-
-Restart Claude Code. Onboarding starts automatically.
+- **Content strategists** who want to maximize the reach of existing assets without adding production time
+- **Digital marketers** running multi-channel programs who need format-native content for each channel
+- **Email and social media managers** who are constantly pulling content from longer-form assets
+- **Solo operators and small teams** without the bandwidth to reformat everything manually
+- **Anyone sitting on a library of underperforming assets** that could be doing more across more channels
 
 ---
 
@@ -170,8 +130,6 @@ Configuration saves to `content-remix/content-remix-config.json` in your working
 
 ## How it works
 
-### Pre-run workflow
-
 Every job runs through seven gates before any content is generated:
 
 | Gate | What it confirms |
@@ -189,8 +147,6 @@ A pre-run summary block is shown before generation begins. Nothing is produced u
 
 ### On return launches
 
-You are presented with your saved config and memory state, then dropped straight into the pre-run workflow.
-
 | What's loaded | What it does |
 |---|---|
 | Config | Brand voice, audience, ICP, domain loaded silently |
@@ -204,7 +160,7 @@ You are presented with your saved config and memory state, then dropped straight
 | Format | What it produces |
 |---|---|
 | Blog post | Full-length SEO-structured post with declarative H2/H3s, TL;DR block, short paragraphs, internal links, and meta description |
-| Email | Single email or full sequence (3–5 emails) — goal and funnel stage confirmed before writing; each email has one job |
+| Email | Single email or full sequence — goal and funnel stage confirmed before writing; each email has one job |
 | Social posts | Platform-native posts for LinkedIn, X/Twitter, Instagram, or any channel — asks for platform and post count before writing |
 | Landing page | Full page copy with hero, body sections, proof points, and CTA — asks for subtype before writing |
 | White paper | Research-heavy, authoritative, citation-dense, 3,000–5,000 words. Executive summary, problem statement, analysis, recommendations. |
@@ -275,6 +231,10 @@ curl -fsSL https://raw.githubusercontent.com/drew-rewired/content-remix/main/con
 ```
 
 Then restart Claude Code.
+
+---
+
+Full changelog: [CHANGELOG.md](CHANGELOG.md)
 
 ---
 
