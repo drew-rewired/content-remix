@@ -4,6 +4,13 @@ All notable changes to the Content Remix Skill are documented here.
 
 ---
 
+## [2.3] — 2026-04-06
+
+### Fixed
+- **Gate 6 citation loop endpoint** — After all citations are reviewed, the skill now explicitly proceeds to content generation using only approved sources. Previously the transition from citation approval to generation was implied but not stated, leaving the flow undefined after the last citation was handled.
+
+---
+
 ## [2.2] — 2026-04-06
 
 ### Fixed

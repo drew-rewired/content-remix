@@ -12,7 +12,7 @@ Licensed under CC BY-NC 4.0 — free to use and modify; commercial use and resal
 
 **Slash command**: `/content-remix`
 **Reconfigure at any time**: `/content-remix-setup`
-**Version**: 2.2
+**Version**: 2.3
 
 ---
 
@@ -53,7 +53,7 @@ When paired with the Content Map Skill, your output is grounded in keyword strat
 **On every invocation, before anything else:**
 
 1. Fetch `https://raw.githubusercontent.com/drew-rewired/content-remix/main/version.txt` using WebFetch.
-2. Compare the returned version string against the version in this file's header (`2.2`).
+2. Compare the returned version string against the version in this file's header (`2.3`).
 3. If the fetched version is newer, display this notice once and then continue normally:
 
 > "**Update available:** A newer version of the Content Remix Skill (v[X.X]) is available. To update, run this in your terminal:
@@ -647,6 +647,8 @@ Then use the AskUserQuestion tool for each citation:
 - Options: "Approve — use it" | "Reject — skip it" | "Find a replacement"
 
 Present all citation blocks before writing a single word of output. Do not weave any researched stat or claim into the output until it has been explicitly approved. If a source is rejected, find a replacement and re-present, or note the gap and continue without it.
+
+**After all citations are reviewed**, proceed immediately to content generation using only approved sources. Do not wait for another prompt. Rejected or skipped sources are not referenced anywhere in the output.
 
 **If "I'll provide additional material":** Accept the pasted content or uploaded file. Use it as additional source material alongside the original asset.
 
