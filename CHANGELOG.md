@@ -4,6 +4,15 @@ All notable changes to the Content Remix Skill are documented here.
 
 ---
 
+## [2.2] — 2026-04-06
+
+### Fixed
+- **Cross-skill path mismatch** — content-remix now correctly searches for the content-map report at `content-map-report.md` in the current working directory. Previously it searched `content-map/*/content-map-report.md` (subdirectory with wildcard), which never matched the flat path content-map actually saves to. The integration between the two skills was broken.
+- **Gate 1.5 contradiction for Content Brief mode** — The Behavior Reference table now correctly reflects that Gate 1.5 runs in limited form for content briefs: stage detection is skipped (stage is locked from the brief), but the repositioning question is still offered. Previously the table said to skip Gate 1.5 entirely, contradicting the skill body.
+- **YMYL detection mechanism** — EEAT review now includes explicit detection logic: checks `additional_context` and `primary_audience` config fields first, then scans domain name and source asset content for YMYL keywords. Previously said "if the domain or content topic is healthcare/finance/legal, flag it" with no mechanism for determining this.
+
+---
+
 ## [2.1] — 2026-04-06
 
 ### Added

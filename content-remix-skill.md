@@ -12,7 +12,7 @@ Licensed under CC BY-NC 4.0 — free to use and modify; commercial use and resal
 
 **Slash command**: `/content-remix`
 **Reconfigure at any time**: `/content-remix-setup`
-**Version**: 2.1
+**Version**: 2.2
 
 ---
 
@@ -53,7 +53,7 @@ When paired with the Content Map Skill, your output is grounded in keyword strat
 **On every invocation, before anything else:**
 
 1. Fetch `https://raw.githubusercontent.com/drew-rewired/content-remix/main/version.txt` using WebFetch.
-2. Compare the returned version string against the version in this file's header (`2.1`).
+2. Compare the returned version string against the version in this file's header (`2.2`).
 3. If the fetched version is newer, display this notice once and then continue normally:
 
 > "**Update available:** A newer version of the Content Remix Skill (v[X.X]) is available. To update, run this in your terminal:
@@ -117,7 +117,7 @@ Look for `content-remix/content-remix-config.json` in the current working direct
 
 Check for a content map report on every run.
 
-Search for `content-map/*/content-map-report.md` in the current working directory.
+Search for `content-map-report.md` in the current working directory.
 
 - **If found**: Load it silently as background context. Do not announce it. Use it to inform keyword strategy, funnel stage positioning, internal linking opportunities, EEAT gap findings, competitor intelligence, and brand voice. This context shapes every decision the skill makes.
 - **If not found on a return run (config exists)**: Display the following notice **once per session only**. Do not repeat it. Do not block the user from proceeding.
@@ -765,7 +765,14 @@ Google's framework for evaluating content quality. Flag if missing:
 - **Authoritativeness**: Is the content positioned as a credible source? Author attribution, organizational credibility, and external signals of authority present?
 - **Trustworthiness**: Are claims accurate? Are sources cited? Is the content free of manipulative framing or unsupported assertions?
 
-**YMYL flag**: If the domain or content topic is healthcare, finance, or legal, flag it: "This content is subject to YMYL (Your Money or Your Life) standards — Google applies an elevated quality bar to this category. Every claim must be traceable. Every credential signal must be present. Missing or thin EEAT in YMYL content is treated as a hard quality failure, not a minor gap."
+**YMYL flag**: Before running the EEAT review, determine whether the domain or content is YMYL. Use this detection order:
+
+1. Check the `additional_context` and `primary_audience` fields in the saved config. If the industry is explicitly stated, use it.
+2. If ambiguous, check the saved domain name and the source asset's content for any of the following terms: healthcare, health plan, health insurance, insurance, Medicaid, Medicare, clinical, medical, pharma, pharmaceutical, finance, financial, investment, legal, law, attorney.
+
+If YMYL is detected by either check, flag it before the EEAT review: "This content is subject to YMYL (Your Money or Your Life) standards — Google applies an elevated quality bar to this category. Every claim must be traceable. Every credential signal must be present. Missing or thin EEAT in YMYL content is treated as a hard quality failure, not a minor gap."
+
+If YMYL is not detected, proceed with standard EEAT evaluation without the flag.
 
 ---
 
@@ -1151,7 +1158,7 @@ Rules: One action per email. 100–200 words max. Behavioral triggers outperform
 | Gate 6 — research approved | Search for industry-specific sources. AskUserQuestion per citation: Approve / Reject / Find replacement |
 | Gate 6 — research stat rejected | Find replacement and re-present, or note gap and continue |
 | Gate 7 — job name | Propose plain-language name: `{topic}-{YYYY-MM-DD}`. User confirms or renames. |
-| Audit / map report found | Load silently. Use for keyword context, internal links, funnel stage, EEAT gaps, brand voice |
+| Audit / map report found (`content-map-report.md` in current directory) | Load silently. Use for keyword context, internal links, funnel stage, EEAT gaps, brand voice |
 | No map report found (return run) | Display one-time notice per session. Do not repeat. Do not block. |
 | Image or infographic submitted | Attempt native Claude vision reading first. Ask for description only if native reading fails. |
 | Internal linking (landing page, blog, white paper, ebook, email) | Always attempted. Priority order: Content Map → sitemap crawl → user-provided page list → homepage nav crawl. Covers content pages AND company/CTA pages. |
@@ -1161,7 +1168,7 @@ Rules: One action per email. 100–200 words max. Behavioral triggers outperform
 | Internal link pool — no map, no sitemap, no page list | Crawl homepage nav links as minimal fallback. Note limitation in output. |
 | Optimize Original mode — internal links | Same priority order. If no map, ask for sitemap or page list before generating. |
 | EEAT/AEO/GEO check | Runs after generation for landing pages, blog posts, white papers, ebooks only |
-| YMYL content detected | Quality gate flags elevated EEAT standard. Applies to healthcare, finance, and legal domains/topics. |
+| YMYL detection | Check config fields first (`additional_context`, `primary_audience`), then domain name and source asset content for YMYL keywords. Flag elevated EEAT standard if detected. |
 | Quality Gate | Runs internally before every delivery. User only sees it if issues require their input to resolve. |
 | Single format output | Delivered in-chat + saved as .md in job output folder |
 | Multi-format output | Saved as tabbed HTML file in job output folder + brief in-chat summary + browser open instructions |
@@ -1182,5 +1189,5 @@ Rules: One action per email. 100–200 words max. Behavioral triggers outperform
 | Content brief intake — key points | Optional. "To skip, press Enter or type 'skip'." If skipped → generate outline before writing. |
 | Content brief intake — reference URLs | Optional. "To skip, press Enter or type 'skip'." |
 | Content brief — key points skipped | Generate content outline. AskUserQuestion: Looks good, write it / Let me add key points first. Wait for confirmation before generating content. |
-| Content brief — funnel stage stated | Do not run Gate 1.5 stage detection. Funnel stage is already locked from brief intake. |
+| Content brief — funnel stage stated | Gate 1.5 runs in limited form: skip stage detection (stage is locked from brief), but ask whether the output should target the brief's stated stage or be repositioned to a different one. |
 | Content brief — research mode prompt | Prompt differently: "Research is strongly recommended for net-new content. Go online to find supporting data, stats, and examples?" AskUserQuestion: Yes, search online / I'll provide references / Skip research. |
