@@ -9,7 +9,7 @@
 
 <br>
 
-<img src="https://img.shields.io/badge/version-2.1-000000?style=flat-square" alt="version">&nbsp;<img src="https://img.shields.io/badge/free-open%20source-111111?style=flat-square" alt="free">&nbsp;<img src="https://img.shields.io/badge/Claude%20Code-skill-CC0000?style=flat-square" alt="Claude Code skill">
+<img src="https://img.shields.io/badge/version-2.3-000000?style=flat-square" alt="version">&nbsp;<img src="https://img.shields.io/badge/free-open%20source-111111?style=flat-square" alt="free">&nbsp;<img src="https://img.shields.io/badge/Claude%20Code-skill-CC0000?style=flat-square" alt="Claude Code skill">
 
 <br>
 
@@ -54,6 +54,59 @@ No new research. No new ideas. Just existing assets working harder.
 This skill is designed to work alongside the **[Content Map Skill](https://github.com/drew-rewired/content-map)**. The Content Map Skill audits your full content program, identifies which assets to fix, reposition, or ungate, and surfaces what is underperforming or invisible to search. Once you know what to act on, the Content Remix Skill takes those assets and rebuilds them for every channel and format you need.
 
 They work independently — but together they close the full loop: see clearly, then act fast.
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│  /content-map  ──  content audit + strategy                            │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  Integrations ──  GA4 · Google Search Console · Semrush               │
+│                   (all optional — map runs without them)               │
+│                                                                         │
+│    ┌───────────────┬──────────────────────┬────────────────────┐       │
+│    │ Full inventory│  Google Search       │  Single diagnostic │       │
+│    │               │  Console             │                    │       │
+│    └───────┬───────┴──────────────────────┴────────────────────┘       │
+│            │                                                            │
+│  ── audit ──────────────────────────────────────────────────────────  │
+│   Layer 1  ──  Inventory                                               │
+│   Layer 2  ──  Funnel mapping              TOFU · MOFU · BOFU         │
+│   Layer 3  ──  Gating audit                                            │
+│   Layer 4  ──  Performance triangulation   ◄── GA4 · Search Console   │
+│   Layer 5  ──  Competitor gap analysis     ◄── Semrush                │
+│   Layer 6  ──  EEAT / AEO / GEO scrub                                 │
+│  ── strategy ───────────────────────────────────────────────────────  │
+│   Layer 7  ──  Gap identification + citation approval                  │
+│   Layer 8  ──  Repurposing check  (reposition before net-new)         │
+│   Layer 9  ──  Output → content-map-report.md                         │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+                   │
+                   │  content-map-report.md loaded automatically
+                   ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│  /content-remix  ──  content generation                                │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  Input ──  URL · PDF · doc · image · transcript · brief                │
+│                                                                         │
+│   Gate 1    ──  Input detection + funnel stage                         │
+│   Gate 1.5  ──  Output stage lock  (same · reposition)                │
+│   Gate 2    ──  Output format  (12 options)                            │
+│   Gate 3    ──  Subtype                                                │
+│   Gate 4    ──  Organic or paid                                        │
+│   Gate 5    ──  Audience confirmation                                  │
+│   Gate 6    ──  Research mode + citation approval                      │
+│   Gate 7    ──  Job name + pre-run confirmation                        │
+│                                                                         │
+│   Generation + EEAT / AEO / GEO review + Quality Gate                │
+│                                                                         │
+│  Output ──  blog post · landing page · white paper · ebook            │
+│             email sequence · social posts · podcast script            │
+│             presentation · infographic brief · video script           │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
