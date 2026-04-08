@@ -4,6 +4,13 @@ All notable changes to the Content Remix Skill are documented here.
 
 ---
 
+## [2.4] — 2026-04-08
+
+### Fixed
+- **Version check — Bash instead of WebFetch** — Update detection now runs via `curl` using the Bash tool. WebFetch silently fails on raw.githubusercontent.com in some environments, causing the update notice to never appear.
+
+---
+
 ## [2.3] — 2026-04-06
 
 ### Fixed
